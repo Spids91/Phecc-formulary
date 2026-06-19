@@ -75,24 +75,24 @@ function buildDet(d) {
       <div class="dsb"><ul class="blist">${adm.map(a => `<li>${a}</li>`).join('')}</ul></div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:#F0FDF4">✅</div><div class="dst">Indications</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--success-light)">✅</div><div class="dst">Indications</div></div>
       <div class="dsb"><ul class="blist">${d.indications.map(i => `<li>${i}</li>`).join('')}</ul></div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:#FFF5F5">🚫</div><div class="dst">Contraindications</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--error-light)">🚫</div><div class="dst">Contraindications</div></div>
       <div class="dsb"><div class="ci-list">${d.contraindications.map(c => `
         <div class="ci"><div class="ci-dot"></div><div class="ci-text">${c}</div></div>`).join('')}
       </div></div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:#FFFBEB">💉</div><div class="dst">Dosages</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--warning-light)">💉</div><div class="dst">Dosages</div></div>
       <div class="dsb"><div class="dose-block">
         <div class="dose-grp"><div class="dose-lbl">👤 Adult</div>${dh(d.dosages.adult)}</div>
         <div class="dose-grp"><div class="dose-lbl">👶 Paediatric</div>${dh(d.dosages.paediatric)}</div>
       </div></div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:#FFF5F5">⚠️</div><div class="dst">Side Effects</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--error-light)">⚠️</div><div class="dst">Side Effects</div></div>
       <div class="dsb"><ul class="blist">${d.sideEffects.map(s => `<li>${s}</li>`).join('')}</ul></div>
     </div>
     <div class="dsec">
@@ -100,7 +100,7 @@ function buildDet(d) {
       <div class="dsb"><div class="info-box">${d.additionalInfo}</div></div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:#EFF6FF">📈</div><div class="dst">Question Progress</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--primary-light)">📈</div><div class="dst">Question Progress</div></div>
       <div class="dsb">
         <div class="prog-wrap">
           <div class="prog-fill" style="width:${pct}%;background:linear-gradient(to right,#1E3A8A,#3B82F6)"></div>
@@ -109,7 +109,7 @@ function buildDet(d) {
       </div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:#F5F3FF">📝</div><div class="dst">My Notes</div></div>
+      <div class="dsh"><div class="sico" style="background:rgba(124,58,237,.08)">📝</div><div class="dst">My Notes</div></div>
       <div class="dsb">
         <textarea class="notes-area" id="note-${d.id}"
           placeholder="Add your own notes, mnemonics, clinical pearls…"
