@@ -120,13 +120,21 @@ function makeDailyQs() {
     const d = MEDS[Math.floor(seededRnd(seed,i)*MEDS.length)];
     const qt = EASY_Q[Math.floor(seededRnd(seed,i+100)*EASY_Q.length)];
     const correct = qt.a(d);
-    const wrongIdx = [];
-    while (wrongIdx.length < 3) {
-      const wi = Math.floor(seededRnd(seed, i*100+wrongIdx.length+200)*MEDS.length);
-      if (wi !== MEDS.indexOf(d) && !wrongIdx.includes(wi)) wrongIdx.push(wi);
+    const correctIdx = MEDS.indexOf(d);
+    // Build a shuffled pool of wrong indices — no while loop, no infinite loop risk
+    const pool = [];
+    for (let j = 0; j < MEDS.length; j++) {
+      if (j !== correctIdx) pool.push(j);
     }
+    // Seeded shuffle of the pool
+    for (let j = pool.length - 1; j > 0; j--) {
+      const k = Math.floor(seededRnd(seed, i*500+j+300) * (j+1));
+      [pool[j], pool[k]] = [pool[k], pool[j]];
+    }
+    const wrongIdx = pool.slice(0, 3);
     const wrong = wrongIdx.map(wi => qt.a(MEDS[wi]).split(';')[0].trim().substring(0,90));
     const opts = [correct, ...wrong];
+    // Seeded shuffle of options
     for (let j = opts.length-1; j > 0; j--) {
       const k = Math.floor(seededRnd(seed, i*1000+j)*(j+1));
       [opts[j],opts[k]] = [opts[k],opts[j]];
