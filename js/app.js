@@ -1,13 +1,13 @@
 // ─── APP.JS — Tús Medic ───────────────────────────────────────────────────────
 
 const LEVELS=[
-  {name:"Rookie",          xp:0,    next:100,      color:"#475569",gradient:"linear-gradient(135deg,#0F172A,#334155)"},
-  {name:"Student",         xp:100,  next:300,      color:"#0891B2",gradient:"linear-gradient(135deg,#0C4A6E,#0891B2)"},
-  {name:"Responder",       xp:300,  next:600,      color:"#2563EB",gradient:"linear-gradient(135deg,#1E3A8A,#2563EB)"},
-  {name:"Clinician",       xp:600,  next:1000,     color:"#7C3AED",gradient:"linear-gradient(135deg,#4C1D95,#7C3AED)"},
-  {name:"Expert",          xp:1000, next:1500,     color:"#D97706",gradient:"linear-gradient(135deg,#78350F,#D97706)"},
-  {name:"Senior Clinician",xp:1500, next:2200,     color:"#EA580C",gradient:"linear-gradient(135deg,#7C2D12,#EA580C)"},
-  {name:"Master Clinician",xp:2200, next:Infinity, color:"#DC2626",gradient:"linear-gradient(135deg,#7F1D1D,#DC2626)"}
+  {name:"Rookie",          xp:0,     next:250,      color:"#475569",gradient:"linear-gradient(135deg,#0F172A,#334155)"},
+  {name:"Student",         xp:250,   next:750,      color:"#0891B2",gradient:"linear-gradient(135deg,#0C4A6E,#0891B2)"},
+  {name:"Responder",       xp:750,   next:1750,     color:"#2563EB",gradient:"linear-gradient(135deg,#1E3A8A,#2563EB)"},
+  {name:"Clinician",       xp:1750,  next:3500,     color:"#7C3AED",gradient:"linear-gradient(135deg,#4C1D95,#7C3AED)"},
+  {name:"Expert",          xp:3500,  next:6000,     color:"#D97706",gradient:"linear-gradient(135deg,#78350F,#D97706)"},
+  {name:"Senior Clinician",xp:6000,  next:9500,     color:"#EA580C",gradient:"linear-gradient(135deg,#7C2D12,#EA580C)"},
+  {name:"Master Clinician",xp:9500,  next:Infinity, color:"#DC2626",gradient:"linear-gradient(135deg,#7F1D1D,#DC2626)"}
 ];
 function getLevel(xp){for(let i=LEVELS.length-1;i>=0;i--)if(xp>=LEVELS[i].xp)return LEVELS[i];return LEVELS[0];}
 
@@ -24,7 +24,7 @@ const MASTERY_LABELS={unseen:'· Unseen',novice:'◎ Novice',learning:'~ Learnin
 function masteryTag(id){
   const correct=G.drugCorrect[id]||0;
   const m=getMastery(correct);
-  // Don't show "unseen" label — just show count
+  // Display caps at 10/10 — internal count still drives spaced repetition
   const label=m==='unseen'?`Questions (0/10)`:MASTERY_LABELS[m]+` (${Math.min(correct,10)}/10)`;
   return`<div class="mtag mt-${m}">${label}</div>`;
 }
@@ -36,12 +36,14 @@ const BADGES=[
   {id:'streak_30',      icon:'🔥', name:'30 Day Streak',         check:g=>g.streak>=30},
   {id:'mastered_10',    icon:'⭐', name:'10 Drugs Mastered',     check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=10},
   {id:'mastered_25',    icon:'💜', name:'25 Drugs Mastered',     check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=25},
-  {id:'mastered_all',   icon:'👑', name:'All 46 Mastered',       check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=46},
+  {id:'mastered_all',   icon:'👑', name:'All 46 Drugs Mastered', check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=46},
   {id:'emt_mastered',   icon:'🏆', name:'All EMT Drugs Mastered',check:g=>MEDS.filter(m=>m.scope.includes('EMT')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
+  {id:'par_mastered',   icon:'🥈', name:'All Paramedic Drugs Mastered',check:g=>MEDS.filter(m=>m.scope.includes('P')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
+  {id:'ap_mastered',    icon:'🥇', name:'All AP Drugs Mastered', check:g=>MEDS.filter(m=>m.scope.includes('AP')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
   {id:'xp_500',         icon:'⚡', name:'500 XP',                check:g=>g.xp>=500},
   {id:'xp_1000',        icon:'🚀', name:'1000 XP',               check:g=>g.xp>=1000},
   {id:'questions_100',  icon:'🧠', name:'100 Questions',         check:g=>g.totalQ>=100},
-  {id:'all_opened',     icon:'💊', name:'Opened Every Drug',     check:g=>MEDS.every(m=>(g.drugCorrect[m.id]||0)>=0&&g.seenDrugs&&g.seenDrugs.includes(m.id))},
+  {id:'all_opened',     icon:'💊', name:'Opened Every Drug',     check:g=>MEDS.every(m=>g.seenDrugs&&g.seenDrugs.includes(m.id))},
   {id:'freeze_used',    icon:'❄️', name:'Used Streak Freeze',    check:g=>g.freezesUsed>=1}
 ];
 
@@ -88,15 +90,47 @@ function logToday(questions,correct,quizzes,xp){
   G.dailyLog[k].xp+=xp;
 }
 
+// Level-up celebration
+function showLevelUp(level){
+  const overlay=document.getElementById('levelUpOverlay');
+  if(!overlay)return;
+  document.getElementById('luLevelName').textContent=level.name;
+  const card=document.getElementById('luCard');
+  if(card)card.style.background=level.gradient;
+  // Build confetti
+  const confettiWrap=document.getElementById('luConfetti');
+  if(confettiWrap){
+    const colors=['#FCD34D','#34D399','#60A5FA','#F87171','#C4B5FD','#FB923C'];
+    let html='';
+    for(let i=0;i<40;i++){
+      const left=Math.random()*100;
+      const delay=Math.random()*0.6;
+      const dur=2+Math.random()*1.5;
+      const col=colors[Math.floor(Math.random()*colors.length)];
+      const size=6+Math.random()*6;
+      const rot=Math.random()*360;
+      html+=`<span class="lu-confetti-piece" style="left:${left}%;width:${size}px;height:${size}px;background:${col};animation-delay:${delay}s;animation-duration:${dur}s;transform:rotate(${rot}deg)"></span>`;
+    }
+    confettiWrap.innerHTML=html;
+  }
+  overlay.classList.add('show');
+  haptic('success');
+}
+function closeLevelUp(){
+  const overlay=document.getElementById('levelUpOverlay');
+  if(overlay)overlay.classList.remove('show');
+}
+
 // Streak freeze
 function useFreeze(){
-  if(G.freezeTokens<=0){showToast('No freeze tokens remaining');return;}
+  if(G.freezeTokens<=0){showToast('No freeze tokens — master more drugs to earn them');return;}
+  if(G.lastDate===todayKey()){showToast('Your streak is already safe for today');return;}
   if(confirm('Use a streak freeze token to protect your streak today?')){
     G.freezeTokens--;G.freezesUsed++;
     // Extend lastDate to today so streak isn't broken
     G.lastDate=todayKey();
     checkBadges();saveG();renderHome();
-    showToast('❄️ Streak freeze used!');
+    showToast('❄️ Streak freeze used — your streak is safe!');
   }
 }
 
@@ -256,6 +290,7 @@ function updateStats(){
   MEDS.forEach(m=>counts[getDM(m.id)]++);
   document.getElementById('stXP').textContent=G.xp;
   document.getElementById('stStreak').textContent=G.streak;
+  document.getElementById('stQuestions').textContent=G.totalQ;
   document.getElementById('stQuizzes').textContent=G.quizzes;
   document.getElementById('stAccuracy').textContent=G.totalQ>0?Math.round(G.totalCorrect/G.totalQ*100)+'%':'—';
   document.getElementById('tCorrect').textContent=G.totalCorrect;
@@ -338,8 +373,8 @@ function renderChart(){
   const hasData=vals.some(v=>v>0);
   const suffix=chartMetric==='accuracy'?'%':'';
   const labels=days.map(d=>{const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('en-IE',{weekday:'short'}).slice(0,2);});
-  const colors={questions:['#2563EB','#1E3A8A'],accuracy:['#00875A','#006644'],quizzes:['#7C3AED','#4C1D95'],xp:['#D97706','#78350F']};
-  const [c1,c2]=colors[chartMetric]||['#2563EB','#1E3A8A'];
+  const colors={questions:['#0F172A','#1E293B'],accuracy:['#00875A','#006644'],quizzes:['#7C3AED','#4C1D95'],xp:['#D97706','#78350F']};
+  const [c1,c2]=colors[chartMetric]||['#0F172A','#1E293B'];
   el.innerHTML=days.map((d,i)=>{
     const h=Math.round((vals[i]/niceMax)*120);
     return '<div class="chart-bar-wrap">'

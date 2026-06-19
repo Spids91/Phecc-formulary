@@ -49,7 +49,7 @@ const TERM_CATEGORIES=[
   {name:'Respiratory',icon:'🫁',terms:['Apnoea','Asphyxia','Bronchospasm','Croup','Dyspnoea','Hyperventilation','Pneumothorax','Pulmonary Embolism (PE)','Pulmonary Oedema','Stridor','Tachypnoea','Tension Pneumothorax','Wheeze']},
   {name:'Neurology',icon:'🧠',terms:['Ataxia','Cerebrovascular Accident (CVA)','Coma','Convulsion','Dissociation','Dystonia','Lethargy','Meningism','Meningitis','Paraesthesia','Seizure','Syncope','Transient Ischaemic Attack (TIA)','Vertigo']},
   {name:'Metabolic & Endocrine',icon:'⚗️',terms:['Acidosis','Alkalosis','Dehydration','Hyperglycaemia','Hyperkalaemia','Hyperthermia','Hypoglycaemia','Hypokalaemia','Hypothermia','Pyrexia']},
-  {name:'Haematology & Bleeding',icon:'🩸',terms:['Anaemia','Haematoma','Haematuria','Haemolysis','Haemoptysis','Haemorrhage','Haemostasis']},
+  {name:'Haematology & Bleeding',icon:'🩸',terms:['Anaemia','Haematemesis','Haematoma','Haematuria','Haemolysis','Haemoptysis','Haemorrhage','Haemostasis']},
   {name:'Renal & Fluid',icon:'💧',terms:['Diuresis','Hypovolaemia','Oedema','Oliguria','Orthostatic Hypotension','Polydipsia','Polyuria']},
   {name:'Gastrointestinal',icon:'🫃',terms:['Nausea','Dysphagia','Jaundice']},
   {name:'Musculoskeletal & Trauma',icon:'🦴',terms:['Crepitus','Rhabdomyolysis','Trauma']},

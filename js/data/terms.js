@@ -53,6 +53,7 @@ const TERMS = [
   {term:"Extravasation",     def:"Leakage of IV fluid or drugs out of the vein and into surrounding tissue, which can cause tissue damage."},
   {term:"Fibrillation",      def:"Rapid, chaotic electrical activity in the heart. Ventricular fibrillation (VF) is immediately life-threatening."},
   {term:"Haematoma",         def:"A localised collection of blood outside blood vessels, often clotted, forming a lump under the skin."},
+  {term:"Haematemesis",      def:"The vomiting of blood, indicating bleeding in the upper gastrointestinal tract."},
   {term:"Haematuria",        def:"The presence of blood in the urine."},
   {term:"Haemolysis",        def:"The destruction of red blood cells, leading to the release of haemoglobin into the plasma."},
   {term:"Haemoptysis",       def:"Coughing up blood from the respiratory tract."},

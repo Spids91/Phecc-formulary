@@ -120,13 +120,34 @@ function makeDrugQs(drugs, n=10, adaptive=true) {
       pool.push({ drug:d, qt, opts:[correct,...wrong].sort(()=>Math.random()-.5), isTerm:false });
     }
   });
-  // Prioritise lower mastery
-  pool.sort((a,b) => {
-    const ma = G.drugCorrect[a.drug.id]||0;
-    const mb = G.drugCorrect[b.drug.id]||0;
-    return ma - mb + (Math.random()-.5);
+  // Weighted shuffle: lower-mastery drugs get higher selection weight, but with
+  // enough randomness that the same drugs don't appear in the same order every time.
+  // Each item gets a random key scaled by a mastery-derived weight, then we sort by key.
+  pool.forEach(item => {
+    const mastery = G.drugCorrect[item.drug.id] || 0;
+    // Weight: unseen/low mastery = high weight (up to 6), mastered = low weight (1)
+    const weight = Math.max(1, 6 - Math.min(mastery, 5));
+    // Random key in (0,1], divided by weight — lower keys sort first, higher weight = lower key
+    item._key = Math.pow(Math.random(), 1 / weight);
   });
-  return pool.slice(0, Math.min(n, pool.length));
+  pool.sort((a, b) => b._key - a._key);
+  // De-duplicate so the same drug doesn't appear too many times in one quiz
+  const selected = [];
+  const drugCount = {};
+  const maxPerDrug = drugs.length >= n ? 1 : Math.ceil(n / drugs.length);
+  for (const item of pool) {
+    if (selected.length >= n) break;
+    const c = drugCount[item.drug.id] || 0;
+    if (c < maxPerDrug) { selected.push(item); drugCount[item.drug.id] = c + 1; }
+  }
+  // If we couldn't fill n with the per-drug limit, top up from the rest
+  if (selected.length < n) {
+    for (const item of pool) {
+      if (selected.length >= n) break;
+      if (!selected.includes(item)) selected.push(item);
+    }
+  }
+  return selected.slice(0, Math.min(n, selected.length));
 }
 
 function makeTermQs(n=10) {
@@ -183,16 +204,19 @@ let QZ = {
   qs: [], idx: 0, correct: 0, answered: false, flipped: false,
   xpThis: 0, isTerms: false, isDaily: false, isTimed: false,
   streak: 0, wrongAnswers: [],
+  fcXpEarned: 0,  // flashcard XP earned this session — capped to discourage gaming
   timeLeft: 30, timerRef: null,
   lastMode: 'standard', lastScope: 'all', lastFmt: 'mc', lastAdaptive: false,
 };
+const FC_XP_CAP = 15;  // max XP earnable from a single flashcard session
 
-// XP multiplier — higher level earns slightly more per correct answer
-function xpPerQ() {
+// XP per correct answer — multiple choice earns full, flashcard earns less (harder to verify)
+function xpPerQ(isFlashcard) {
   const lv = getLevel(G.xp);
   const idx = ['Rookie','Student','Responder','Clinician','Expert','Senior Clinician','Master Clinician'].indexOf(lv.name);
-  // Base 3 XP, +1 every two levels: Rookie=3, Student=3, Responder=4, Clinician=4, Expert=5, Senior=5, Master=6
-  return 3 + Math.floor(idx / 2);
+  // Base 2 XP for MC, +1 every three levels. Flashcards earn 1 XP flat (self-marked, easy to game)
+  if (isFlashcard) return 1;
+  return 2 + Math.floor(idx / 3);
 }
 
 function getQText(q)   { return q.isTerm ? q.qt.q(q.term) : q.qt.q(q.drug); }
@@ -426,7 +450,7 @@ function launch(qs, isTimed=false, isTerms=false, isDaily=false) {
   QZ.lastFmt = QZ.fmt; QZ.lastAdaptive = QZ.adaptive;
   // Reset state
   Object.assign(QZ, { qs, idx:0, correct:0, answered:false, flipped:false,
-    xpThis:0, isTerms, isDaily, isTimed, streak:0, wrongAnswers:[],
+    xpThis:0, fcXpEarned:0, isTerms, isDaily, isTimed, streak:0, wrongAnswers:[],
     timeLeft:30, timerRef:null });
   showQuizActive();
   if (QZ.fmt === 'fc') {
@@ -496,10 +520,18 @@ function timeUp() {
 
 // ── STREAK BURST ──────────────────────────────────────────────────────────────
 function checkBurst() {
-  if (QZ.streak > 0 && QZ.streak % 3 === 0) {
+  let bonus = 0;
+  if (QZ.streak === 5)  bonus = 5;
+  if (QZ.streak === 10) bonus = 10;
+  // Every further 10 in a row also rewards +10
+  if (QZ.streak > 10 && QZ.streak % 10 === 0) bonus = 10;
+  if (bonus > 0) {
     const el = document.getElementById('streakBurst');
-    if (el) { el.textContent = `🔥 ${QZ.streak} in a row! +5 XP`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
-    QZ.xpThis += 5; G.xp += 5; updateHdr();
+    if (el) { el.textContent = `🔥 ${QZ.streak} in a row! +${bonus} XP`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
+    const levelBefore = getLevel(G.xp).name;
+    QZ.xpThis += bonus; G.xp += bonus; updateHdr();
+    const levelAfter = getLevel(G.xp).name;
+    if (levelBefore !== levelAfter) setTimeout(() => showLevelUp(getLevel(G.xp)), 400);
   }
 }
 
@@ -534,7 +566,12 @@ function flipCard() {
 function markCard(correct) {
   const q = QZ.qs[QZ.idx];
   if (correct) {
-    QZ.correct++; G.totalCorrect++; QZ.xpThis += xpPerQ(); QZ.streak++;
+    QZ.correct++; G.totalCorrect++; QZ.streak++;
+    // Flashcard XP is reduced and capped per session — self-marked, easy to game
+    const gain = xpPerQ(true);
+    if (QZ.fcXpEarned + gain <= FC_XP_CAP) {
+      QZ.xpThis += gain; QZ.fcXpEarned += gain;
+    }
     if (!q.isTerm) { G.drugCorrect[q.drug.id] = (G.drugCorrect[q.drug.id]||0)+1; srNextDate(q.drug.id, true); }
     checkBurst(); haptic('success');
   } else {
@@ -612,9 +649,16 @@ function showResults() {
   let bonus = 0;
   if (isDaily && !isDailyDone()) { bonus = 15; G.lastDailyDate = todayKey(); }
   const totalXP = xpThis + bonus;
+  // Capture level before and after awarding XP to detect a level-up
+  const levelBefore = getLevel(G.xp).name;
   G.xp += totalXP;
+  const levelAfter = getLevel(G.xp).name;
   logToday(total, correct, 1, totalXP);
   checkBadges(); saveG(); updateHdr();
+  // Trigger level-up celebration if the level changed
+  if (levelBefore !== levelAfter) {
+    setTimeout(() => showLevelUp(getLevel(G.xp)), 600);
+  }
   document.getElementById('fcMode').style.display = 'none';
   document.getElementById('mcMode').style.display = 'none';
   const res = document.getElementById('qResults');

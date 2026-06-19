@@ -51,13 +51,12 @@ function renderHome(){
   // Streak + freeze tokens
   document.getElementById('homeStreakNum').textContent=`${G.streak} day streak`;
   const freezeEl=document.getElementById('homeFreezes');
-  const total=Math.min((G.freezeTokens||0)+(G.freezesUsed||0),5);
-  let freezeHtml='';
-  for(let i=0;i<Math.max(total,1);i++){
-    const used=i>=(G.freezeTokens||0);
-    freezeHtml+=`<span class="freeze-token${used?' used':''}" onclick="useFreeze()" title="Streak freeze token">❄️</span>`;
-  }
-  freezeEl.innerHTML=freezeHtml;
+  const tokens=G.freezeTokens||0;
+  // Single clear button showing snowflake + count, tappable to use
+  freezeEl.innerHTML=`<button class="freeze-btn${tokens<=0?' empty':''}" onclick="useFreeze()" aria-label="Streak freeze tokens">`
+    +`<span class="freeze-flake">❄️</span>`
+    +`<span class="freeze-count">${tokens}</span>`
+    +`</button>`;
 
   // Daily Challenge card on home
   const dailyEl=document.getElementById('homeDailyCard');

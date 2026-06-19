@@ -3,7 +3,9 @@
 // iOS-style swipe right to close with animation
 let _touchStartX = 0;
 let _touchStartY = 0;
-let _swiping = false;
+let _swiping = false;        // committed to a horizontal close swipe
+let _gestureLocked = false;  // direction decided for this gesture
+let _isVerticalScroll = false;
 
 function initSwipeBack() {
   const overlay = document.getElementById('detOverlay');
@@ -12,14 +14,32 @@ function initSwipeBack() {
     _touchStartX = e.touches[0].clientX;
     _touchStartY = e.touches[0].clientY;
     _swiping = false;
+    _gestureLocked = false;
+    _isVerticalScroll = false;
   }, { passive: true });
 
   overlay.addEventListener('touchmove', e => {
     const dx = e.touches[0].clientX - _touchStartX;
-    const dy = Math.abs(e.touches[0].clientY - _touchStartY);
-    // Only track horizontal swipe starting from left edge area
-    if (dx > 0 && dy < 60) {
-      _swiping = true;
+    const dy = e.touches[0].clientY - _touchStartY;
+
+    // Decide gesture direction once, on the first meaningful movement.
+    // If the user moves more vertically than horizontally, treat it as a scroll
+    // and never hijack it as a swipe (prevents the page jumping up/down).
+    if (!_gestureLocked) {
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+        _gestureLocked = true;
+        // Only start a close-swipe if it begins near the left edge AND is
+        // clearly horizontal (at least twice as much X as Y movement)
+        const fromLeftEdge = _touchStartX < 80;
+        if (dx > 0 && Math.abs(dx) > Math.abs(dy) * 2 && fromLeftEdge) {
+          _swiping = true;
+        } else {
+          _isVerticalScroll = true;
+        }
+      }
+    }
+
+    if (_swiping && dx > 0) {
       const pct = Math.min(dx / window.innerWidth, 1);
       overlay.style.transform = 'translateX(' + (dx * 0.6) + 'px)';
       overlay.style.opacity = String(1 - pct * 0.3);
@@ -28,9 +48,8 @@ function initSwipeBack() {
 
   overlay.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - _touchStartX;
-    const dy = Math.abs(e.changedTouches[0].clientY - _touchStartY);
-    if (_swiping && dx > 100 && dy < 60) {
-      // Complete the swipe
+    if (_swiping && dx > 100) {
+      // Complete the swipe to close
       overlay.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
       overlay.style.transform = 'translateX(100%)';
       overlay.style.opacity = '0';
@@ -40,14 +59,22 @@ function initSwipeBack() {
         overlay.style.opacity = '';
         closeDet();
       }, 250);
-    } else {
-      // Snap back
+    } else if (_swiping) {
+      // Snap back — clear styles immediately after the animation so the next
+      // tap is never blocked by a lingering transition
       overlay.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
       overlay.style.transform = '';
       overlay.style.opacity = '';
-      setTimeout(() => { overlay.style.transition = ''; }, 300);
+      setTimeout(() => {
+        overlay.style.transition = '';
+        overlay.style.transform = '';
+        overlay.style.opacity = '';
+      }, 300);
     }
+    // Always reset gesture flags so the next touch starts clean
     _swiping = false;
+    _gestureLocked = false;
+    _isVerticalScroll = false;
   }, { passive: true });
 }
 
@@ -65,7 +92,9 @@ function openDet(id) {
     d.scope.map(s => `<span class="sbadge sbadge-${s}">${smap[s]}</span>`).join('') +
     `<span class="det-mbadge det-mbadge-${m}">${mLabel}</span>`;
   document.getElementById('detBody').innerHTML = buildDet(d);
-  document.getElementById('detOverlay').classList.add('open');
+  const overlay = document.getElementById('detOverlay');
+  overlay.classList.add('open');
+  overlay.scrollTop = 0;  // always start at the top of the drug detail
   document.body.style.overflow = 'hidden';
   haptic();
 }
