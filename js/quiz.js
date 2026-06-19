@@ -127,7 +127,7 @@ function flipCard(){
 }
 function markCard(correct){
   if(correct){
-    QZ.correct++;G.totalCorrect++;QZ.xpThis+=10;
+    QZ.correct++;G.totalCorrect++;QZ.xpThis+=3;
     if(!QZ.isTerms){const id=QZ.qs[QZ.idx].drug.id;G.drugCorrect[id]=(G.drugCorrect[id]||0)+1;}
     haptic('success');
   }else haptic('error');
@@ -155,7 +155,7 @@ function answerMC(btn,correct,drugId){
   if(QZ.answered)return;
   QZ.answered=true;
   if(correct){
-    btn.classList.add('correct');QZ.correct++;G.totalCorrect++;QZ.xpThis+=10;
+    btn.classList.add('correct');QZ.correct++;G.totalCorrect++;QZ.xpThis+=3;
     if(drugId)G.drugCorrect[drugId]=(G.drugCorrect[drugId]||0)+1;
     haptic('success');
   }else{

@@ -24,7 +24,9 @@ const MASTERY_COLORS={unseen:'#94A3B8',novice:'#D97706',learning:'#0E7490',profi
 function masteryTag(id){
   const correct=G.drugCorrect[id]||0;
   const m=getMastery(correct);
-  return`<div class="mtag mt-${m}">Questions (${Math.min(correct,10)}/10)</div>`;
+  // Don't show "unseen" label — just show count
+  const label=m==='unseen'?`Questions (0/10)`:MASTERY_LABELS[m]+` (${Math.min(correct,10)}/10)`;
+  return`<div class="mtag mt-${m}">${label}</div>`;
 }
 
 // BADGES
@@ -55,7 +57,7 @@ let G={
 };
 
 function loadG(){
-  try{const s=localStorage.getItem('tusMedicG61');if(s)G={...G,...JSON.parse(s)};}catch(e){}
+  try{const s=localStorage.getItem('tusMedicG62');if(s)G={...G,...JSON.parse(s)};}catch(e){}
   MEDS.forEach(m=>{
     if(!G.drugCorrect[m.id])G.drugCorrect[m.id]=0;
     if(G.notes[m.id]===undefined)G.notes[m.id]='';
@@ -65,7 +67,7 @@ function loadG(){
   if(!G.dailyLog)G.dailyLog={};
   if(!G.trackingStart)G.trackingStart=todayKey();
 }
-function saveG(){try{localStorage.setItem('tusMedicG61',JSON.stringify(G));}catch(e){}}
+function saveG(){try{localStorage.setItem('tusMedicG62',JSON.stringify(G));}catch(e){}}
 function getDM(id){return getMastery(G.drugCorrect[id]||0);}
 function todayKey(){return new Date().toISOString().slice(0,10);}
 
