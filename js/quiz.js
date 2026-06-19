@@ -217,6 +217,10 @@ function renderQuizTab() {
     html += '<div id="reviewBanner" class="review-banner"><div class="review-banner-icon">🔁</div><div class="review-banner-text"><strong>' + dueCount + ' drug' + (dueCount > 1 ? 's' : '') + ' due for review</strong><br>Based on your spaced repetition schedule</div><div class="review-banner-arrow">→</div></div>';
   }
 
+  // Questions List reference card
+  html += '<div class="quiz-mode-section-label" style="margin-top:16px">Reference</div>';
+  html += '<div id="questionsListCard" class="terms-quiz-card"><div class="qmode-icon">📝</div><div class="terms-quiz-info"><div class="qmode-name">Questions List</div><div class="qmode-desc">Browse every question by drug</div></div><div style="color:var(--text3)">→</div></div>';
+
   document.getElementById('quizTabContent').innerHTML = html;
 
   // Attach event listeners cleanly — no inline onclick needed
@@ -248,6 +252,63 @@ function renderQuizTab() {
   if (reviewBanner) {
     reviewBanner.addEventListener('click', function() { goSetup('review', false); });
   }
+
+  const qListCard = document.getElementById('questionsListCard');
+  if (qListCard) {
+    qListCard.addEventListener('click', showQuestionsList);
+  }
+}
+
+// ── QUESTIONS LIST (reference) ────────────────────────────────────────────────
+function showQuestionsList() {
+  let html = '';
+  html += '<div id="qListBack" class="quiz-back-sticky"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back</div>';
+  html += '<div class="pg-title">📝 Questions List</div>';
+  html += '<div class="pg-sub">Every question that can appear, grouped by drug</div>';
+  html += '<div class="gsearch-wrap"><svg class="si" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input type="search" id="qListSearch" placeholder="Search drugs…" autocomplete="off" spellcheck="false"/></div>';
+  html += '<div id="qListAccordion"></div>';
+  document.getElementById('quizTabContent').innerHTML = html;
+
+  document.getElementById('qListBack').addEventListener('click', renderQuizTab);
+  document.getElementById('qListSearch').addEventListener('input', function() {
+    renderQuestionsAccordion(this.value.trim().toLowerCase());
+  });
+  renderQuestionsAccordion('');
+}
+
+function renderQuestionsAccordion(query) {
+  const sorted = [...MEDS].sort((a,b) => a.name.localeCompare(b.name));
+  const filtered = query ? sorted.filter(d => d.name.toLowerCase().includes(query) || d.classification.toLowerCase().includes(query)) : sorted;
+  const el = document.getElementById('qListAccordion');
+  if (!el) return;
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">🔍</div><p>No drugs match your search</p></div>';
+    return;
+  }
+  let html = '';
+  filtered.forEach(d => {
+    const safeId = 'ql-' + d.id;
+    html += '<div class="ql-card" data-drug="' + d.id + '">';
+    html += '<div class="ql-header"><div class="ql-name">' + d.name + '</div><div class="ql-chevron">›</div></div>';
+    html += '<div class="ql-body">';
+    // All question types — easy then hard
+    [...EASY_Q, ...HARD_Q].forEach(qt => {
+      html += '<div class="ql-q"><div class="ql-q-type">' + qt.prompt + '</div><div class="ql-q-text">' + qt.q(d) + '</div></div>';
+    });
+    html += '</div>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+
+  // Accordion behaviour
+  document.querySelectorAll('.ql-card').forEach(card => {
+    card.querySelector('.ql-header').addEventListener('click', function() {
+      const wasOpen = card.classList.contains('open');
+      document.querySelectorAll('.ql-card.open').forEach(c => c.classList.remove('open'));
+      if (!wasOpen) card.classList.add('open');
+      haptic();
+    });
+  });
 }
 
 // ── SETUP SCREENS ─────────────────────────────────────────────────────────────
@@ -609,6 +670,3 @@ function showResults() {
   }
   renderHome();
 }
-
-// ── COMPAT ────────────────────────────────────────────────────────────────────
-function updateQuizCounts() {} // kept for any legacy calls

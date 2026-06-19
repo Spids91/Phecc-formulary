@@ -1,4 +1,4 @@
-// ─── DETAIL.JS v6.2 ───────────────────────────────────────────────────────────
+// ─── DETAIL.JS ────────────────────────────────────────────────────────────────
 
 // iOS-style swipe right to close with animation
 let _touchStartX = 0;
@@ -63,7 +63,7 @@ function openDet(id) {
   const mLabel  = m === 'unseen' ? `Questions (0/10)` : `${MASTERY_LABELS[m]} (${Math.min(correct,10)}/10)`;
   document.getElementById('detBadges').innerHTML =
     d.scope.map(s => `<span class="sbadge sbadge-${s}">${smap[s]}</span>`).join('') +
-    `<span class="det-mbadge" style="background:${MASTERY_COLORS[m]}22;color:${MASTERY_COLORS[m]}">${mLabel}</span>`;
+    `<span class="det-mbadge det-mbadge-${m}">${mLabel}</span>`;
   document.getElementById('detBody').innerHTML = buildDet(d);
   document.getElementById('detOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -152,7 +152,5 @@ function buildDet(d) {
     </div>`;
 }
 
-// Init swipe on load
-document.addEventListener('DOMContentLoaded', initSwipeBack);
-// Also init immediately in case DOMContentLoaded already fired
+// Init swipe — DOM is already parsed since this script loads at end of body
 initSwipeBack();

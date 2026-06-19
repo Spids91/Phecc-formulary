@@ -32,9 +32,4 @@ document.querySelectorAll('.chip').forEach(c=>{
   });
 });
 
-document.getElementById('searchInput').addEventListener('input',e=>{
-  refQ=e.target.value.trim().toLowerCase();
-  if(!refQ)renderDrugList();
-});
-
 renderDrugList();

@@ -1,4 +1,4 @@
-// ─── APP.JS — Tús Medic v6.1 ──────────────────────────────────────────────────
+// ─── APP.JS — Tús Medic ───────────────────────────────────────────────────────
 
 const LEVELS=[
   {name:"Rookie",          xp:0,    next:100,      color:"#475569",gradient:"linear-gradient(135deg,#0F172A,#334155)"},
@@ -19,7 +19,7 @@ function getMastery(correct){
   return'unseen';
 }
 const MASTERY_LABELS={unseen:'· Unseen',novice:'◎ Novice',learning:'~ Learning',proficient:'✦ Proficient',mastered:'★ Mastered'};
-const MASTERY_COLORS={unseen:'#9CA3AF',novice:'#D97706',learning:'#0891B2',proficient:'#2563EB',mastered:'#00875A'};
+// Mastery colours live in style.css as --mastery-* tokens and .mt-*/.det-mbadge-* classes
 
 function masteryTag(id){
   const correct=G.drugCorrect[id]||0;
@@ -151,12 +151,11 @@ function scrollTop(){window.scrollTo({top:0,behavior:'instant'});}
 function toggleDark(){
   const h=document.documentElement,dark=h.getAttribute('data-theme')==='dark';
   h.setAttribute('data-theme',dark?'light':'dark');
-  document.getElementById('darkBtn').textContent=dark?'🌙':'☀️';
   try{localStorage.setItem('tusMedicTheme',dark?'light':'dark');}catch(e){}
   haptic();
 }
 function loadTheme(){
-  try{const t=localStorage.getItem('tusMedicTheme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');document.getElementById('darkBtn').textContent='☀️';}}catch(e){}
+  try{const t=localStorage.getItem('tusMedicTheme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}
 }
 
 function checkOnline(){document.getElementById('offlineBar').classList.toggle('show',!navigator.onLine);}
@@ -254,7 +253,7 @@ function renderChart(){
   const el=document.getElementById('chartArea');
   if(!el)return;
   const days=[];
-  for(let i=13;i>=0;i--){
+  for(let i=6;i>=0;i--){
     const d=new Date();d.setDate(d.getDate()-i);
     days.push(d.toISOString().slice(0,10));
   }

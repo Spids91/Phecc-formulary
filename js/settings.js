@@ -93,27 +93,27 @@ const LEGAL = {
   patches: {
     title: 'Patch Notes',
     body: `
-      <h2>v1.0.0 — June 2026</h2>
+      <h2>v1.0.0</h2>
       <p>Settings panel with dark mode, legal documents and version info. Complete quiz engine rewrite. Terms of Service and Privacy Policy. Streak XP multiplier. Hospital search scrolls to result. Drug of the Day full shuffle. Theme audit — all token references corrected.</p>
-      <h2>v0.9.1 — June 2026</h2>
+      <h2>v0.9.1</h2>
       <p>Floating pill tab bar. iOS swipe animation on drug detail. Chart y-axis. Standard and Adaptive as separate quiz modes. Real date on daily challenge. Rookie level card fixed. Privacy policy added.</p>
-      <h2>v0.9.0 — June 2026</h2>
+      <h2>v0.9.0</h2>
       <p>Universal design system — Inter font, cobalt blue primary, deep green success, spacing tokens, type scale.</p>
-      <h2>v0.8.0 — June 2026</h2>
+      <h2>v0.8.0</h2>
       <p>Complete quiz overhaul — daily challenge, 6 quiz modes, spaced repetition, timed mode, category quiz, streak burst, wrong answer breakdown.</p>
-      <h2>v0.7.0 — June 2026</h2>
+      <h2>v0.7.0</h2>
       <p>Swipe to close drug detail. Accordion fix. Card colours. Navy progress bar. XP rebalanced. © Keith O'Reilly 2026 added.</p>
-      <h2>v0.6.0 — June 2026</h2>
+      <h2>v0.6.0</h2>
       <p>Badges, streak freeze tokens, activity bar chart, study time, warmer light mode.</p>
-      <h2>v0.5.0 — June 2026</h2>
+      <h2>v0.5.0</h2>
       <p>Home dashboard, disclaimer modal, adaptive quiz, medical terms categories, Tús Medic rebrand.</p>
-      <h2>v0.4.0 — June 2026</h2>
+      <h2>v0.4.0</h2>
       <p>Codebase refactor into separate files.</p>
-      <h2>v0.3.0 — June 2026</h2>
+      <h2>v0.3.0</h2>
       <p>Learn tab, PCR codes, PCI line, medical terms, paed calculator, global search.</p>
-      <h2>v0.2.0 — June 2026</h2>
+      <h2>v0.2.0</h2>
       <p>Dark mode, mastery system, notes, haptic feedback, XP levels.</p>
-      <h2>v0.1.0 — June 2026</h2>
+      <h2>v0.1.0</h2>
       <p>Initial release — 46 PHECC 2026 drugs, reference, quiz, GitHub Pages.</p>
       <p class="legal-meta">© Keith O'Reilly 2026</p>`
   }
