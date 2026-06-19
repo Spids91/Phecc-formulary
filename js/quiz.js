@@ -315,6 +315,7 @@ function renderQuestionsAccordion(query) {
 
 // ── SETUP SCREENS ─────────────────────────────────────────────────────────────
 function goSetup(mode, adaptive) {
+  window.scrollTo({top:0,behavior:'instant'});
   QZ.mode = mode;
   QZ.adaptive = adaptive;
   if (mode === 'weakspots') { launchWeakSpots(); return; }
@@ -350,6 +351,7 @@ function goSetup(mode, adaptive) {
 }
 
 function goCategoryPicker() {
+  window.scrollTo({top:0,behavior:'instant'});
   let html = '';
   html += '<div id="catPickerBack" class="quiz-back-sticky"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back</div>';
   html += '<div class="pg-title">🔬 Category Quiz</div>';
@@ -378,6 +380,7 @@ function goCategoryPicker() {
 }
 
 function selectCat(name) {
+  window.scrollTo({top:0,behavior:'instant'});
   QZ.mode = 'category';
   QZ.category = name;
   QZ.adaptive = false;
@@ -447,6 +450,7 @@ function startDaily() {
 }
 
 function launch(qs, isTimed=false, isTerms=false, isDaily=false) {
+  window.scrollTo({top:0,behavior:'instant'});
   // Save last settings for New Quiz
   QZ.lastMode = QZ.mode; QZ.lastScope = QZ.scope;
   QZ.lastFmt = QZ.fmt; QZ.lastAdaptive = QZ.adaptive;

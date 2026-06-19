@@ -235,7 +235,7 @@ function renderPaed(){
       <button class="paed-scope-btn" onclick="setPaedScope('AP',this)">Adv. Paramedic</button>
     </div>
     <div class="paed-input-row">
-      <input type="number" class="paed-input" id="paedAge" placeholder="0" min="0" max="18" oninput="calcPaed(this.value)"/>
+      <input type="number" class="paed-input" id="paedAge" placeholder="0" min="0" max="15" oninput="calcPaed(this.value)"/>
       <span class="paed-unit">years old</span>
     </div>
     <div id="paedResult" style="display:none" class="paed-result">
@@ -270,6 +270,7 @@ function setPaedScope(scope,el){
 function calcPaed(age){
   age=parseFloat(age);
   if(isNaN(age)||age<0){document.getElementById('paedResult').style.display='none';return;}
+  if(age>15){age=15;const inp=document.getElementById('paedAge');if(inp)inp.value=15;}
   let wt;
   if(age===0)wt=3.5;
   else if(age<=0.5)wt=6;
@@ -326,7 +327,7 @@ function renderPCR(){
   const grouped={};
   filtered.forEach(h=>{if(!grouped[h.county])grouped[h.county]=[];grouped[h.county].push(h);});
   return Object.entries(grouped).map(([county,hosps])=>`
-    <div class="hosp-county">${county}</div>
+    <div class="hosp-county-header">${county}</div>
     ${hosps.map(h=>{
       const mainDial=h.main.split('/')[0].replace(/[^0-9]/g,'');
       const edDial=h.ed!=='n/a'?h.ed.split('/')[0].replace(/[^0-9]/g,''):'';
