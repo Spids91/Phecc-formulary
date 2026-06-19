@@ -48,7 +48,7 @@ const BADGES=[
 // STATE
 let G={
   xp:0,streak:0,lastDate:null,quizzes:0,totalQ:0,totalCorrect:0,
-  drugCorrect:{},notes:{},disclaimerDone:false,
+  drugCorrect:{},notes:{},disclaimerDone:false,onboardingDone:false,
   seenDrugs:[],
   earnedBadges:[],
   freezeTokens:1,freezesUsed:0,
@@ -163,9 +163,74 @@ function checkOnline(){document.getElementById('offlineBar').classList.toggle('s
 function dismissDisclaimer(){
   document.getElementById('disclaimerModal').style.display='none';
   G.disclaimerDone=true;saveG();
+  // Show onboarding next if not yet seen
+  if(!G.onboardingDone)startOnboarding();
+}
+
+// ── ONBOARDING ────────────────────────────────────────────────────────────────
+let onbStep=0;
+const ONB_TOTAL=3;
+
+function startOnboarding(){
+  onbStep=0;
+  updateOnboarding();
+  document.getElementById('onbOverlay').classList.add('show');
+}
+
+function updateOnboarding(){
+  // Panels
+  document.querySelectorAll('.onb-panel').forEach((p,i)=>{
+    p.classList.toggle('active',i===onbStep);
+  });
+  // Dots
+  document.querySelectorAll('.onb-dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===onbStep);
+  });
+  // Back button visibility
+  document.getElementById('onbBack').style.visibility=onbStep===0?'hidden':'visible';
+  // Next button label
+  document.getElementById('onbNext').textContent=onbStep===ONB_TOTAL-1?'Get Started':'Next';
+}
+
+function onbNext(){
+  haptic();
+  if(onbStep<ONB_TOTAL-1){
+    onbStep++;
+    updateOnboarding();
+  }else{
+    finishOnboarding();
+  }
+}
+
+function onbPrev(){
+  haptic();
+  if(onbStep>0){
+    onbStep--;
+    updateOnboarding();
+  }
+}
+
+function finishOnboarding(){
+  document.getElementById('onbOverlay').classList.remove('show');
+  G.onboardingDone=true;saveG();
+  haptic();
+  // Land on home
+  showPage('home',document.getElementById('btn-home'));
+}
+
+// Allow re-viewing onboarding from settings
+function replayOnboarding(){
+  closeSettings();
+  setTimeout(startOnboarding,250);
 }
 function checkDisclaimer(){
-  if(!G.disclaimerDone)document.getElementById('disclaimerModal').style.display='flex';
+  if(!G.disclaimerDone){
+    // New user: show disclaimer first; onboarding follows on dismiss
+    document.getElementById('disclaimerModal').style.display='flex';
+  }else if(!G.onboardingDone){
+    // Existing user who hasn't seen onboarding (e.g. after this update)
+    startOnboarding();
+  }
 }
 
 // NAV
@@ -298,7 +363,7 @@ function confirmReset(){
   if(!confirm('Reset all progress? This cannot be undone.'))return;
   const ts=G.trackingStart||todayKey();
   G={xp:0,streak:0,lastDate:null,quizzes:0,totalQ:0,totalCorrect:0,drugCorrect:{},notes:{},
-     disclaimerDone:G.disclaimerDone,seenDrugs:[],earnedBadges:[],freezeTokens:1,freezesUsed:0,
+     disclaimerDone:G.disclaimerDone,onboardingDone:G.onboardingDone,seenDrugs:[],earnedBadges:[],freezeTokens:1,freezesUsed:0,
      dailyLog:{},trackingStart:ts};
   MEDS.forEach(m=>{G.drugCorrect[m.id]=0;G.notes[m.id]='';});
   saveG();updateHdr();updateStats();renderDonut();renderChart();renderDrugList();renderHome();

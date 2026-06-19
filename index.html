@@ -32,6 +32,47 @@
   </div>
 </div>
 
+<!-- ONBOARDING -->
+<div class="onb-overlay" id="onbOverlay">
+  <div class="onb-card">
+    <button class="onb-skip" id="onbSkip" onclick="finishOnboarding()">Skip</button>
+
+    <div class="onb-panels" id="onbPanels">
+      <!-- Panel 1: Welcome -->
+      <div class="onb-panel active" data-panel="0">
+        <div class="onb-icon">🚑</div>
+        <div class="onb-title">Welcome to Tús Medic</div>
+        <div class="onb-text">The PHECC 2026 formulary in your pocket. Built for EMTs, Paramedics and Advanced Paramedics — every drug, dose and scope, ready when you need it.</div>
+      </div>
+
+      <!-- Panel 2: Learn smarter -->
+      <div class="onb-panel" data-panel="1">
+        <div class="onb-icon">🧠</div>
+        <div class="onb-title">Learn smarter, not harder</div>
+        <div class="onb-text">The quiz system uses <strong>spaced repetition</strong> — it brings drugs back just before you'd forget them. <strong>Adaptive difficulty</strong> ramps up as you improve, and the <strong>Daily Challenge</strong> keeps you sharp every day.</div>
+      </div>
+
+      <!-- Panel 3: Track progress -->
+      <div class="onb-panel" data-panel="2">
+        <div class="onb-icon">📈</div>
+        <div class="onb-title">Track your mastery</div>
+        <div class="onb-text">Earn XP, build streaks and watch each of the 46 drugs move from Novice to Mastered. Plus a paediatric calculator, PCR codes and medical terms — all in one place.</div>
+      </div>
+    </div>
+
+    <div class="onb-dots" id="onbDots">
+      <span class="onb-dot active"></span>
+      <span class="onb-dot"></span>
+      <span class="onb-dot"></span>
+    </div>
+
+    <div class="onb-actions">
+      <button class="onb-back" id="onbBack" onclick="onbPrev()" style="visibility:hidden">Back</button>
+      <button class="onb-next" id="onbNext" onclick="onbNext()">Next</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETTINGS PANEL -->
 <div class="settings-overlay" id="settingsPanel">
   <div class="settings-sheet">
@@ -45,6 +86,12 @@
         <div class="settings-row-icon">🌙</div>
         <div class="settings-row-label">Dark Mode</div>
         <div class="settings-toggle" id="darkToggle"></div>
+      </div>
+      <div class="settings-section-label">Guide</div>
+      <div class="settings-row" onclick="replayOnboarding()">
+        <div class="settings-row-icon">👋</div>
+        <div class="settings-row-label">View Welcome Guide</div>
+        <div class="settings-row-arrow">›</div>
       </div>
       <div class="settings-section-label">Legal</div>
       <div class="settings-row" onclick="openLegal('terms')">
