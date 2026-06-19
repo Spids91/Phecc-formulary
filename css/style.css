@@ -1049,3 +1049,28 @@ ul { list-style: none; }
 .det-mbadge-learning   { background: rgba(8,145,178,.2);   color: #67E8F9; }
 .det-mbadge-proficient { background: rgba(37,99,235,.2);   color: #93C5FD; }
 .det-mbadge-mastered   { background: rgba(0,135,90,.25);   color: #6EE7B7; }
+
+/* ── HOME DAILY CHALLENGE CARD ───────────────────────────────────────── */
+.home-daily-card {
+  background: linear-gradient(135deg, var(--hdr-bg), #1E3A8A);
+  border-radius: var(--r16); padding: var(--sp4); margin-bottom: var(--sp3);
+  color: #fff; cursor: pointer; transition: opacity var(--dur-fast) var(--ease);
+  -webkit-tap-highlight-color: transparent; box-shadow: var(--shadow-md);
+}
+.home-daily-card.done { opacity: .7; cursor: default; }
+
+/* ── COMPACT DAILY CARD (quiz tab) ──────────────────────────────────── */
+.daily-compact {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: var(--r12); padding: var(--sp3) var(--sp4);
+  margin-bottom: var(--sp4); cursor: pointer; box-shadow: var(--shadow);
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur-fast) var(--ease);
+}
+.daily-compact:active { background: var(--surf2); }
+.daily-compact.done { opacity: .65; cursor: default; }
+.daily-compact-left { flex: 1; }
+.daily-compact-title { font-size: var(--text-sm); font-weight: 700; color: var(--text); }
+.daily-compact-sub { font-size: var(--text-xs); color: var(--text3); margin-top: 2px; }
+.daily-compact-right { flex-shrink: 0; margin-left: var(--sp3); }

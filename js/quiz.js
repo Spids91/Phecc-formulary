@@ -195,17 +195,11 @@ function renderQuizTab() {
   // All click handlers added via addEventListener after innerHTML set
   let html = '';
 
-  // Daily card — no onclick in HTML
-  html += '<div id="dailyChallengeCard" class="daily-card' + (done ? ' done' : '') + '">';
-  html += '<div class="daily-top">';
-  html += '<div class="daily-icon">📅</div>';
-  html += '<div class="daily-info">';
-  html += '<div class="daily-title">Daily Challenge</div>';
-  html += '<div class="daily-sub">5 questions · ' + dateStr + ' · same for everyone</div>';
-  html += '</div>';
-  html += '<div class="daily-status">' + (done ? '<span class="daily-done-badge">✓ Done</span>' : '<span class="daily-start-btn">Start →</span>') + '</div>';
-  html += '</div>';
-  html += '<div class="' + (done ? 'daily-done-msg' : 'daily-bonus-msg') + '">' + (done ? 'Come back tomorrow for a new set' : '\u26A1 +15 XP bonus for completing today\'s challenge') + '</div>';
+  // Compact daily challenge link on quiz tab
+  html += '<div id="dailyChallengeCard" class="daily-compact' + (done ? ' done' : '') + '">';
+  html += '<div class="daily-compact-left"><div class="daily-compact-title">📅 Daily Challenge</div>';
+  html += '<div class="daily-compact-sub">' + dateStr + ' · ' + (done ? 'Completed ✓' : '+15 XP bonus') + '</div></div>';
+  html += '<div class="daily-compact-right">' + (done ? '<span class="daily-done-badge">✓</span>' : '<span class="daily-start-btn">Start →</span>') + '</div>';
   html += '</div>';
 
   // Mode grid

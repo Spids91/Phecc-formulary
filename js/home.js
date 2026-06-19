@@ -59,6 +59,35 @@ function renderHome(){
   }
   freezeEl.innerHTML=freezeHtml;
 
+  // Daily Challenge card on home
+  const dailyEl=document.getElementById('homeDailyCard');
+  if(dailyEl){
+    const done=isDailyDone();
+    const now=new Date();
+    const dateStr=now.toLocaleDateString('en-IE',{day:'numeric',month:'long'});
+    let dHtml='<div class="home-daily-card'+(done?' done':'')+'" id="homeDailyCardInner">'
+      +'<div class="daily-top">'
+        +'<div class="daily-icon">📅</div>'
+        +'<div class="daily-info">'
+          +'<div class="daily-title">5 questions · '+dateStr+'</div>'
+          +'<div class="daily-sub">Same for everyone · '+(done?'Completed ✓':'+15 XP bonus')+'</div>'
+        +'</div>'
+        +'<div class="daily-status">'+(done
+          ?'<span class="daily-done-badge">✓</span>'
+          :'<span class="daily-start-btn">Start →</span>')
+        +'</div>'
+      +'</div>'
+      +'</div>';
+    dailyEl.innerHTML=dHtml;
+    const inner=document.getElementById('homeDailyCardInner');
+    if(inner){
+      inner.addEventListener('click',function(){
+        if(done){showToast('Come back tomorrow for a new set!');}
+        else{showPage('quiz',document.getElementById('btn-quiz'));scrollTop();startDaily();}
+      });
+    }
+  }
+
   // Drug of the Day
   const d=getDotd();
   document.getElementById('dotdName').textContent=d.name;

@@ -37,16 +37,19 @@ function renderLearnSearch(q){
   }).filter(x=>x.score>0)
     .sort((a,b)=>b.score-a.score||a.t.term.localeCompare(b.t.term))
     .map(x=>x.t);
+
   if(termResults.length){
     html+='<div class="term-cat-header"><span class="term-cat-icon">📖</span>Medical Terms</div>';
-    html+=termResults.map(t=>`
-      <div class="term-card" onclick="toggleTerm(this)" id="term-${t.term.replace(/\s+/g,'_').replace(/[()]/g,'')}">
-        <div class="term-card-header"><div class="term-word">${t.term}</div><div class="term-chevron">›</div></div>
-        <div class="term-def">${t.def}</div>
-      </div>`).join('');
+    termResults.forEach(t=>{
+      const safeId='term-'+t.term.replace(/\s+/g,'_').replace(/[()]/g,'');
+      html+='<div class="term-card" data-term-id="'+safeId+'" id="'+safeId+'">'
+        +'<div class="term-card-header"><div class="term-word">'+t.term+'</div><div class="term-chevron">›</div></div>'
+        +'<div class="term-def">'+t.def+'</div>'
+        +'</div>';
+    });
   }
 
-  // Search hospitals
+  // Search hospitals — store dial numbers as data attributes, attach handlers after render
   const hospResults=HOSPITALS.filter(h=>
     h.name.toLowerCase().includes(q)||
     h.pcr.toLowerCase().includes(q)||
@@ -54,18 +57,20 @@ function renderLearnSearch(q){
   );
   if(hospResults.length){
     html+='<div class="term-cat-header" style="margin-top:16px"><span class="term-cat-icon">🏥</span>Hospitals</div>';
-    html+=hospResults.map(h=>{
+    hospResults.forEach(h=>{
       const mainDial=h.main.split('/')[0].replace(/[^0-9]/g,'');
       const edDial=h.ed!=='n/a'?h.ed.split('/')[0].replace(/[^0-9]/g,''):'';
-      return`<div class="hosp-card" id="hosp-${h.pcr}">
-        <div class="hosp-name">${h.name}</div>
-        <div><span class="hosp-code">${h.pcr}</span></div>
-        <div class="hosp-nums">
-          <div class="hosp-num"><div class="hosp-num-lbl">Main Line</div><div class="hosp-num-val" onclick="callNumber('${mainDial}')">${h.main}</div></div>
-          <div class="hosp-num"><div class="hosp-num-lbl">ED / Direct</div><div class="hosp-num-val ${h.ed==='n/a'?'na':''}" ${h.ed!=='n/a'?`onclick="callNumber('${edDial}')"`:''}>${h.ed}</div></div>
-        </div>
-      </div>`;
-    }).join('');
+      html+='<div class="hosp-card" id="hosp-'+h.pcr+'">'
+        +'<div class="hosp-name">'+h.name+'</div>'
+        +'<div><span class="hosp-code">'+h.pcr+'</span></div>'
+        +'<div class="hosp-nums">'
+          +'<div class="hosp-num"><div class="hosp-num-lbl">Main Line</div>'
+            +'<div class="hosp-num-val" data-dial="'+mainDial+'">'+h.main+'</div></div>'
+          +'<div class="hosp-num"><div class="hosp-num-lbl">ED / Direct</div>'
+            +'<div class="hosp-num-val'+(h.ed==='n/a'?' na':'')+'" data-dial="'+(edDial||'')+'">'+h.ed+'</div></div>'
+        +'</div>'
+        +'</div>';
+    });
   }
 
   if(!html){
@@ -73,6 +78,15 @@ function renderLearnSearch(q){
   }
 
   c.innerHTML=html;
+
+  // Attach handlers after render — no inline onclick needed
+  c.querySelectorAll('.term-card').forEach(card=>{
+    card.addEventListener('click',function(){ toggleTerm(this); });
+  });
+  c.querySelectorAll('.hosp-num-val[data-dial]').forEach(el=>{
+    const dial=el.dataset.dial;
+    if(dial) el.addEventListener('click',()=>callNumber(dial));
+  });
 }
 
 function clearLearnSearch(){
