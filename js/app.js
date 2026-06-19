@@ -178,7 +178,7 @@ function showPage(id,btn){
   if(id==='home')renderHome();
   if(id==='quiz')renderQuizTab();
   if(id==='stats'){updateStats();renderDonut();renderChart();}
-  if(id==='learn')renderLearn();
+  if(id==='learn')renderStudy();
 }
 function goHome(){showPage('home',document.getElementById('btn-home'));scrollTop();}
 function goProgress(){showPage('stats',document.getElementById('btn-stats'));scrollTop();}
@@ -306,13 +306,12 @@ function confirmReset(){
 // GLOBAL SEARCH
 let _gsTimer=null;
 function handleGlobalSearch(q,clearId,resultsId){
-  const clearBtn=document.getElementById(clearId||'searchClear');
+  const clearBtn=document.getElementById(clearId||'homeSearchClear');
   if(clearBtn)clearBtn.style.display=q?'flex':'none';
   clearTimeout(_gsTimer);
-  const el=document.getElementById(resultsId||'gsearchResults');
+  const el=document.getElementById(resultsId||'homeSearchResults');
   if(!q.trim()){
     el.classList.remove('show');el.innerHTML='';
-    if(resultsId!=='homeSearchResults'){refQ='';renderDrugList();}
     return;
   }
   _gsTimer=setTimeout(()=>{
@@ -349,16 +348,16 @@ function handleGlobalSearch(q,clearId,resultsId){
       .slice(0,3)
       .forEach(({t})=>results.push({type:'term',name:t.term,sub:t.def.substring(0,60)+'…',action:()=>{
         showPage('learn',document.getElementById('btn-learn'));
-        selLearn('terms',document.querySelector('[data-lsec="terms"]'));
-        setTimeout(()=>{document.getElementById('learnSearch').value=t.term;handleLearnSearch(t.term);scrollToTerm(t.term);},150);
+        selStudy('terms',document.querySelector('[data-ssec="terms"]'));
+        scrollToStudyTerm(t.term);
       }}));
 
     HOSPITALS.filter(h=>h.name.toLowerCase().includes(ql)||h.pcr.toLowerCase().includes(ql)||h.county.toLowerCase().includes(ql))
       .slice(0,3).forEach(h=>results.push({type:'hospital',name:h.name,sub:`${h.county} — PCR: ${h.pcr}`,action:()=>{
-        showPage('learn',document.getElementById('btn-learn'));
-        selLearn('pcr',document.querySelector('[data-lsec="pcr"]'));
-        // Wait for both showPage and selLearn renders to complete before scrolling
-        setTimeout(()=>scrollToHospital(h.pcr),500);
+        showPage('ref',document.getElementById('btn-ref'));
+        selRefSection('pcr',document.querySelector('[data-refsec="pcr"]'));
+        // Wait for both showPage and section render to complete before scrolling
+        setTimeout(()=>scrollToHospital(h.pcr),300);
       }}));
 
     if(!results.length){
@@ -371,17 +370,11 @@ function handleGlobalSearch(q,clearId,resultsId){
 }
 
 function gsrClick(i,resultsId){
-  const el=document.getElementById(resultsId||'gsearchResults');
+  const el=document.getElementById(resultsId||'homeSearchResults');
   if(el._actions&&el._actions[i]){
-    // Clear whichever search bar is active before navigating
-    if(resultsId==='homeSearchResults'){
-      document.getElementById('homeSearchInput').value='';
-      document.getElementById('homeSearchClear').style.display='none';
-    } else {
-      document.getElementById('searchInput').value='';
-      document.getElementById('searchClear').style.display='none';
-      refQ='';
-    }
+    // Clear the home search bar before navigating
+    document.getElementById('homeSearchInput').value='';
+    document.getElementById('homeSearchClear').style.display='none';
     el.classList.remove('show');
     el.innerHTML='';
     el._actions[i]();
@@ -412,18 +405,6 @@ function scrollToHospital(pcr){
     el.style.boxShadow='0 0 0 2px var(--primary)';
     setTimeout(()=>{el.style.boxShadow='';},2000);
   }
-}
-
-function scrollToTerm(termName){
-  setTimeout(()=>{
-    const cards=document.querySelectorAll('.term-card');
-    for(const card of cards){
-      if(card.querySelector('.term-word')&&card.querySelector('.term-word').textContent===termName){
-        card.scrollIntoView({behavior:'smooth',block:'center'});
-        card.classList.add('open');break;
-      }
-    }
-  },300);
 }
 
 // INIT

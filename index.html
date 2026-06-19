@@ -170,20 +170,33 @@
 
 <!-- REFERENCE -->
 <div class="page" id="page-ref">
-  <div class="gsearch-wrap">
-    <svg class="si" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input type="search" id="searchInput" placeholder="Search drugs, terms, hospitals…" autocomplete="off" spellcheck="false" oninput="handleGlobalSearch(this.value,'searchClear','gsearchResults')"/>
-    <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none">✕</button>
+  <!-- Section chips: Drugs / Paed / PCR / PCI -->
+  <div class="section-chips">
+    <button class="schip on" data-refsec="drugs" onclick="selRefSection('drugs',this)">Drugs</button>
+    <button class="schip" data-refsec="paed" onclick="selRefSection('paed',this)">Paed Calculator</button>
+    <button class="schip" data-refsec="pcr" onclick="selRefSection('pcr',this)">PCR Codes</button>
+    <button class="schip" data-refsec="pci" onclick="selRefSection('pci',this)">PCI Line</button>
   </div>
-  <div class="gsearch-results" id="gsearchResults"></div>
-  <div class="chips">
-    <button class="chip chip-all on" data-scope="all">All</button>
-    <button class="chip chip-emt" data-scope="EMT">EMT</button>
-    <button class="chip chip-p" data-scope="P">Paramedic</button>
-    <button class="chip chip-ap" data-scope="AP">Adv. Paramedic</button>
+
+  <!-- Drugs section -->
+  <div id="refDrugs">
+    <div class="gsearch-wrap">
+      <svg class="si" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="search" id="searchInput" placeholder="Search drugs…" autocomplete="off" spellcheck="false" oninput="handleRefSearch(this.value)"/>
+      <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none">✕</button>
+    </div>
+    <div class="chips">
+      <button class="chip chip-all on" data-scope="all">All</button>
+      <button class="chip chip-emt" data-scope="EMT">EMT</button>
+      <button class="chip chip-p" data-scope="P">Paramedic</button>
+      <button class="chip chip-ap" data-scope="AP">Adv. Paramedic</button>
+    </div>
+    <div class="sec-lbl" id="listLabel">All Medications (46)</div>
+    <div class="drug-list" id="drugList"></div>
   </div>
-  <div class="sec-lbl" id="listLabel">All Medications (46)</div>
-  <div class="drug-list" id="drugList"></div>
+
+  <!-- Paed / PCR / PCI sections render here -->
+  <div id="refContent" style="display:none"></div>
 </div>
 
 <!-- QUIZ -->
@@ -264,18 +277,19 @@
   </div>
 </div>
 
-<!-- LEARN -->
+<!-- STUDY -->
 <div class="page" id="page-learn">
-  <div class="gsearch-wrap">
-    <svg class="si" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input type="search" id="learnSearch" placeholder="Search terms, hospitals…" autocomplete="off" spellcheck="false" oninput="handleLearnSearch(this.value)"/>
-    <button class="search-clear" id="learnClear" onclick="clearLearnSearch()" style="display:none">✕</button>
+  <!-- Section chips: Medical Terms / Question Bank -->
+  <div class="section-chips section-chips-2">
+    <button class="schip on" data-ssec="terms" onclick="selStudy('terms',this)">Medical Terms</button>
+    <button class="schip" data-ssec="questions" onclick="selStudy('questions',this)">Question Bank</button>
   </div>
-  <div class="learn-chips">
-    <button class="lchip on" data-lsec="terms" onclick="selLearn('terms',this)">Medical Terms</button>
-    <button class="lchip" data-lsec="paed" onclick="selLearn('paed',this)">Paed Calculator</button>
-    <button class="lchip" data-lsec="pcr" onclick="selLearn('pcr',this)">PCR Codes</button>
-    <button class="lchip" data-lsec="pci" onclick="selLearn('pci',this)">PCI Line</button>
+
+  <!-- Search bar (terms only) -->
+  <div class="gsearch-wrap" id="studySearchWrap">
+    <svg class="si" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="search" id="learnSearch" placeholder="Search terms…" autocomplete="off" spellcheck="false" oninput="handleStudySearch(this.value)"/>
+    <button class="search-clear" id="learnClear" onclick="clearStudySearch()" style="display:none">✕</button>
   </div>
   <div id="learnContent"></div>
 </div>
@@ -406,7 +420,7 @@
   </button>
   <button class="nb" id="btn-learn" onclick="showPage('learn',this);scrollTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v13"/><path d="M12 7C10.5 5.5 8 5 4 5v13c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2V5c-4 0-6.5.5-8 2z"/></svg>
-    Learn
+    Study
   </button>
   <button class="nb" id="btn-stats" onclick="showPage('stats',this);scrollTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -424,13 +438,13 @@
 <script src="js/reference.js"></script>
 <script src="js/detail.js"></script>
 <script src="js/quiz.js"></script>
-<script src="js/learn.js"></script>
+<script src="js/study.js"></script>
 <script src="js/settings.js"></script>
 <script>
 // Init render after all scripts loaded
 renderHome();
 renderDrugList();
-renderLearn();
+renderStudy();
 renderQuizTab();
 updateDarkToggle();
 </script>

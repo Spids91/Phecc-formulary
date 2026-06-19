@@ -1,0 +1,168 @@
+// ─── STUDY.JS ─────────────────────────────────────────────────────────────────
+// Study tab: Medical Terms (categorised accordion + search) and Question Bank.
+
+let studySec='terms', studyQ='';
+
+function selStudy(sec,el){
+  document.querySelectorAll('.section-chips [data-ssec]').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  studySec=sec;
+  // Reset search when switching sections
+  studyQ='';
+  const inp=document.getElementById('learnSearch');
+  if(inp)inp.value='';
+  document.getElementById('learnClear').style.display='none';
+  // Search bar only applies to terms
+  document.getElementById('studySearchWrap').style.display=sec==='terms'?'flex':'none';
+  haptic();
+  renderStudy();
+}
+
+function renderStudy(){
+  const c=document.getElementById('learnContent');
+  if(studySec==='terms'){
+    if(studyQ)c.innerHTML=renderTermsSearch(studyQ);
+    else c.innerHTML=renderTerms();
+    attachTermHandlers(c);
+  }else if(studySec==='questions'){
+    renderQuestionBank('');
+  }
+}
+
+// ── SEARCH (terms only) ───────────────────────────────────────────────────────
+function handleStudySearch(q){
+  studyQ=q.toLowerCase();
+  document.getElementById('learnClear').style.display=q?'flex':'none';
+  renderStudy();
+}
+
+function clearStudySearch(){
+  studyQ='';
+  document.getElementById('learnSearch').value='';
+  document.getElementById('learnClear').style.display='none';
+  renderStudy();
+}
+
+// ── MEDICAL TERMS ─────────────────────────────────────────────────────────────
+const TERM_CATEGORIES=[
+  {name:'Cardiovascular',icon:'❤️',terms:['Angina','Arrhythmia','Asystole','Bradycardia','Cardiac Tamponade','Cardiogenic Shock','Defibrillation','Diastole','Fibrillation','Hypertension','Hypertensive Crisis','Hypotension','Myocardial Infarction (MI)','Palpitation','Pericarditis','Sinus Rhythm','Systole','Tachycardia','Thrombosis','Torsades de Pointes','Ventricular Fibrillation (VF)','Ventricular Tachycardia (VT)']},
+  {name:'Respiratory',icon:'🫁',terms:['Apnoea','Asphyxia','Bronchospasm','Croup','Dyspnoea','Hyperventilation','Pneumothorax','Pulmonary Embolism (PE)','Pulmonary Oedema','Stridor','Tachypnoea','Tension Pneumothorax','Wheeze']},
+  {name:'Neurology',icon:'🧠',terms:['Ataxia','Cerebrovascular Accident (CVA)','Coma','Convulsion','Dissociation','Dystonia','Lethargy','Meningism','Meningitis','Paraesthesia','Seizure','Syncope','Transient Ischaemic Attack (TIA)','Vertigo']},
+  {name:'Metabolic & Endocrine',icon:'⚗️',terms:['Acidosis','Alkalosis','Dehydration','Hyperglycaemia','Hyperkalaemia','Hyperthermia','Hypoglycaemia','Hypokalaemia','Hypothermia','Pyrexia']},
+  {name:'Haematology & Bleeding',icon:'🩸',terms:['Anaemia','Haematoma','Haematuria','Haemolysis','Haemoptysis','Haemorrhage','Haemostasis']},
+  {name:'Renal & Fluid',icon:'💧',terms:['Diuresis','Hypovolaemia','Oedema','Oliguria','Orthostatic Hypotension','Polydipsia','Polyuria']},
+  {name:'Gastrointestinal',icon:'🫃',terms:['Nausea','Dysphagia','Jaundice']},
+  {name:'Musculoskeletal & Trauma',icon:'🦴',terms:['Crepitus','Rhabdomyolysis','Trauma']},
+  {name:'Obstetric',icon:'🤱',terms:['Eclampsia','Pre-eclampsia']},
+  {name:'Pharmacology & Drug Terms',icon:'💊',terms:['Analgesia','Antipyretic','Contraindication','Dysuria','Extravasation','Pruritus']},
+  {name:'General Clinical',icon:'🏥',terms:['Acute','Aetiology','Auscultation','Capillary Refill Time (CRT)','Cellulitis','Chronic','Constriction','Decompensation','Diaphoresis','Dilatation','Embolism','Epistaxis','Exacerbation','Hypoxia','Idiopathic','Infarction','Ischaemia','Malaise','Necrosis','Neurogenic Shock','Orthopnoea','Pallor','Perfusion','Periorbital','Shock','Subcutaneous','Tinnitus','Triage','Urticaria','Vasoconstriction','Vasodilation']}
+];
+
+function termCardHtml(t){
+  const safeId='term-'+t.term.replace(/\s+/g,'_').replace(/[()]/g,'');
+  return '<div class="term-card" id="'+safeId+'">'
+    +'<div class="term-card-header"><div class="term-word">'+t.term+'</div><div class="term-chevron">›</div></div>'
+    +'<div class="term-def">'+t.def+'</div>'
+    +'</div>';
+}
+
+function renderTerms(){
+  const getTerm=name=>TERMS.find(t=>t.term===name);
+  return TERM_CATEGORIES.map(cat=>{
+    const catTerms=cat.terms.map(getTerm).filter(Boolean);
+    if(!catTerms.length)return'';
+    return '<div style="margin-bottom:20px">'
+      +'<div class="term-cat-header"><span class="term-cat-icon">'+cat.icon+'</span>'+cat.name+'</div>'
+      +catTerms.map(termCardHtml).join('')
+      +'</div>';
+  }).join('');
+}
+
+function renderTermsSearch(q){
+  // Relevance scored: exact > starts-with > contains > definition
+  const results=TERMS.map(t=>{
+    const term=t.term.toLowerCase();
+    let score=0;
+    if(term===q)score=100;
+    else if(term.startsWith(q))score=80;
+    else if(term.includes(q))score=60;
+    else if(t.def.toLowerCase().includes(q))score=20;
+    return{t,score};
+  }).filter(x=>x.score>0)
+    .sort((a,b)=>b.score-a.score||a.t.term.localeCompare(b.t.term))
+    .map(x=>x.t);
+  if(!results.length)return'<div class="empty"><div class="empty-ico">🔍</div><p>No terms match your search</p></div>';
+  return '<div class="term-cat-header"><span class="term-cat-icon">📖</span>Search Results</div>'
+    +results.map(termCardHtml).join('');
+}
+
+function attachTermHandlers(container){
+  container.querySelectorAll('.term-card').forEach(card=>{
+    card.addEventListener('click',function(){ toggleTerm(this); });
+  });
+}
+
+function toggleTerm(el){
+  document.querySelectorAll('.term-card.open').forEach(c=>{if(c!==el)c.classList.remove('open');});
+  el.classList.toggle('open');
+  haptic();
+}
+
+// Scroll to a specific term (used by home global search)
+function scrollToStudyTerm(termName){
+  setTimeout(()=>{
+    const cards=document.querySelectorAll('.term-card');
+    for(const card of cards){
+      const word=card.querySelector('.term-word');
+      if(word&&word.textContent===termName){
+        card.scrollIntoView({behavior:'smooth',block:'center'});
+        card.classList.add('open');
+        break;
+      }
+    }
+  },150);
+}
+
+// ── QUESTION BANK ─────────────────────────────────────────────────────────────
+function renderQuestionBank(query){
+  const c=document.getElementById('learnContent');
+  let html='';
+  html+='<div class="gsearch-wrap"><svg class="si" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>'
+    +'<input type="search" id="qbankSearch" placeholder="Search drugs…" autocomplete="off" spellcheck="false"/></div>';
+  html+='<div id="qbankAccordion"></div>';
+  c.innerHTML=html;
+  document.getElementById('qbankSearch').addEventListener('input',function(){
+    renderQuestionAccordion(this.value.trim().toLowerCase());
+  });
+  renderQuestionAccordion(query||'');
+}
+
+function renderQuestionAccordion(query){
+  const sorted=[...MEDS].sort((a,b)=>a.name.localeCompare(b.name));
+  const filtered=query?sorted.filter(d=>d.name.toLowerCase().includes(query)||d.classification.toLowerCase().includes(query)):sorted;
+  const el=document.getElementById('qbankAccordion');
+  if(!el)return;
+  if(!filtered.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">🔍</div><p>No drugs match your search</p></div>';
+    return;
+  }
+  let html='';
+  filtered.forEach(d=>{
+    html+='<div class="ql-card" data-drug="'+d.id+'">';
+    html+='<div class="ql-header"><div class="ql-name">'+d.name+'</div><div class="ql-chevron">›</div></div>';
+    html+='<div class="ql-body">';
+    [...EASY_Q,...HARD_Q].forEach(qt=>{
+      html+='<div class="ql-q"><div class="ql-q-type">'+qt.prompt+'</div><div class="ql-q-text">'+qt.q(d)+'</div></div>';
+    });
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+  document.querySelectorAll('.ql-card').forEach(card=>{
+    card.querySelector('.ql-header').addEventListener('click',function(){
+      const wasOpen=card.classList.contains('open');
+      document.querySelectorAll('.ql-card.open').forEach(c=>c.classList.remove('open'));
+      if(!wasOpen)card.classList.add('open');
+      haptic();
+    });
+  });
+}

@@ -733,15 +733,16 @@ ul { list-style: none; }
 [data-theme="dark"] .reset-btn { background: rgba(220,38,38,.15); border-color: var(--error); }
 
 /* ── LEARN ───────────────────────────────────────────────────────────── */
-.learn-chips { display: flex; gap: var(--sp2); margin-bottom: var(--sp4); overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-.learn-chips::-webkit-scrollbar { display: none; }
-.lchip {
-  flex-shrink: 0; padding: 6px var(--sp4); border-radius: var(--r-pill);
-  font-size: var(--text-xs); font-weight: 600; border: 1.5px solid var(--border);
-  background: var(--surf); color: var(--text2); transition: all var(--dur-fast) var(--ease);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
+/* Section chips — Reference (4-col) and Study (2-col) tab section selectors */
+.section-chips { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp2); margin-bottom: var(--sp3); }
+.section-chips-2 { grid-template-columns: 1fr 1fr; }
+.schip {
+  padding: 9px var(--sp2); border-radius: var(--r8); text-align: center;
+  font-size: var(--text-xs); font-weight: 700; border: 1.5px solid var(--border);
+  background: var(--surf2); color: var(--text2); transition: all var(--dur-fast) var(--ease);
+  cursor: pointer; -webkit-tap-highlight-color: transparent; font-family: var(--font);
 }
-.lchip.on { background: var(--hdr-bg); color: #fff; border-color: var(--hdr-bg); }
+.schip.on { background: var(--hdr-bg); color: #fff; border-color: var(--hdr-bg); }
 .pci-card { background: linear-gradient(135deg, var(--hdr-bg), #1E3A8A); border-radius: var(--r12); padding: var(--sp4); margin-bottom: var(--sp3); color: #fff; box-shadow: var(--shadow-md); }
 .pci-number { font-size: var(--text-2xl); font-weight: 800; letter-spacing: .5px; margin: var(--sp2) 0 var(--sp3); cursor: pointer; }
 .pci-row { display: flex; align-items: center; gap: var(--sp3); padding: var(--sp2) 0; border-bottom: 1px solid rgba(255,255,255,.1); }
@@ -861,13 +862,6 @@ ul { list-style: none; }
 .review-banner-icon  { font-size: 20px; flex-shrink: 0; }
 .review-banner-text  { flex: 1; font-size: var(--text-sm); color: var(--text2); line-height: 1.4; }
 .review-banner-arrow { color: var(--text3); font-weight: 700; }
-.terms-quiz-card {
-  background: var(--surf); border: 1px solid var(--border); border-radius: var(--r12);
-  padding: var(--sp3) var(--sp4); margin-bottom: var(--sp3);
-  display: flex; align-items: center; gap: var(--sp3); cursor: pointer;
-  box-shadow: var(--shadow); -webkit-tap-highlight-color: transparent;
-}
-.terms-quiz-info { flex: 1; }
 .cat-card {
   background: var(--surf); border: 1px solid var(--border); border-radius: var(--r12);
   padding: var(--sp3) var(--sp4); display: flex; align-items: center; gap: var(--sp3);
