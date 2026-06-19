@@ -149,6 +149,14 @@ let QZ = {
   lastMode: 'standard', lastScope: 'all', lastFmt: 'mc', lastAdaptive: false,
 };
 
+// XP multiplier — higher level earns slightly more per correct answer
+function xpPerQ() {
+  const lv = getLevel(G.xp);
+  const idx = ['Rookie','Student','Responder','Clinician','Expert','Senior Clinician','Master Clinician'].indexOf(lv.name);
+  // Base 3 XP, +1 every two levels: Rookie=3, Student=3, Responder=4, Clinician=4, Expert=5, Senior=5, Master=6
+  return 3 + Math.floor(idx / 2);
+}
+
 function getQText(q)   { return q.isTerm ? q.qt.q(q.term) : q.qt.q(q.drug); }
 function getQAns(q)    { return q.isTerm ? q.qt.a(q.term) : q.qt.a(q.drug); }
 function getQPrompt(q) { return q.qt.prompt; }
@@ -486,7 +494,7 @@ function flipCard() {
 function markCard(correct) {
   const q = QZ.qs[QZ.idx];
   if (correct) {
-    QZ.correct++; G.totalCorrect++; QZ.xpThis += 3; QZ.streak++;
+    QZ.correct++; G.totalCorrect++; QZ.xpThis += xpPerQ(); QZ.streak++;
     if (!q.isTerm) { G.drugCorrect[q.drug.id] = (G.drugCorrect[q.drug.id]||0)+1; srNextDate(q.drug.id, true); }
     checkBurst(); haptic('success');
   } else {
@@ -531,7 +539,7 @@ function answerMC(btn, correct, drugId) {
   const q = QZ.qs[QZ.idx];
   if (correct) {
     btn.classList.add('correct');
-    QZ.correct++; G.totalCorrect++; QZ.xpThis += 3; QZ.streak++;
+    QZ.correct++; G.totalCorrect++; QZ.xpThis += xpPerQ(); QZ.streak++;
     if (drugId) { G.drugCorrect[drugId] = (G.drugCorrect[drugId]||0)+1; srNextDate(drugId, true); }
     checkBurst(); haptic('success');
   } else {

@@ -144,7 +144,7 @@ function renderPaed(){
       <span class="paed-unit">years old</span>
     </div>
     <div id="paedResult" style="display:none" class="paed-result">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--em-400)">Estimated Weight</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93C5FD">Estimated Weight</div>
       <div class="paed-weight" id="paedWeight">— kg</div>
       <div class="paed-formula-grid" id="paedDrugs"></div>
     </div>
@@ -192,7 +192,7 @@ function calcPaed(age){
 // PCI
 function renderPCI(){
   return`<div class="pci-card">
-    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--em-400)">Primary PCI Line</div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93C5FD">Primary PCI Line</div>
     <div class="pci-number" onclick="callNumber('${PCI_NUMBER.replace(/\s/g,'')}')">${PCI_NUMBER}</div>
     <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:10px">Tap number to dial — then select:</div>
     ${PCI_LABS.map(l=>`<div class="pci-row"><div class="pci-num">${l.n}</div><div class="pci-hospital">${l.hospital}</div></div>`).join('')}
@@ -210,7 +210,7 @@ function renderPCR(){
     ${hosps.map(h=>{
       const mainDial=h.main.split('/')[0].replace(/[^0-9]/g,'');
       const edDial=h.ed!=='n/a'?h.ed.split('/')[0].replace(/[^0-9]/g,''):'';
-      return`<div class="hosp-card">
+      return`<div class="hosp-card" id="hosp-${h.pcr}">
         <div class="hosp-name">${h.name}</div>
         <div><span class="hosp-code">${h.pcr}</span></div>
         <div class="hosp-nums">

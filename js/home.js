@@ -1,7 +1,18 @@
 // ─── HOME.JS ──────────────────────────────────────────────────────────────────
 function getDotd(){
+  // Shuffles through all 46 drugs before repeating any
+  // Uses the day number to pick from a deterministic shuffle sequence
   const day=Math.floor(Date.now()/86400000);
-  return MEDS[day%MEDS.length];
+  const cycle=Math.floor(day/MEDS.length); // which full cycle we're in
+  const pos=day%MEDS.length;              // position within current cycle
+  // Seeded shuffle for this cycle so order changes each time through
+  const indices=[...Array(MEDS.length).keys()];
+  for(let i=indices.length-1;i>0;i--){
+    const seed=cycle*997+i*31+7;
+    const j=Math.abs(Math.sin(seed)*10000)%( i+1)|0;
+    [indices[i],indices[j]]=[indices[j],indices[i]];
+  }
+  return MEDS[indices[pos]];
 }
 function openDotd(){
   const d=getDotd();

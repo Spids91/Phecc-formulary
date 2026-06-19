@@ -138,7 +138,11 @@ function updateHdr(){
   document.getElementById('streakVal').textContent=G.streak;
   const lv=getLevel(G.xp);
   const ll=document.getElementById('levelLabel');
-  ll.textContent=lv.name;ll.style.color=lv.color;
+  ll.textContent=lv.name;
+  // Always readable on dark header - use lighter tint of level colour
+  // For dark colours like Rookie slate, use a fixed light colour instead
+  const darkColours=['#475569','#334155'];
+  ll.style.color=darkColours.includes(lv.color)?'rgba(255,255,255,.55)':lv.color;
 }
 
 function scrollTop(){window.scrollTo({top:0,behavior:'instant'});}
@@ -331,6 +335,7 @@ function handleGlobalSearch(q,clearId,resultsId){
       .slice(0,3).forEach(h=>results.push({type:'hospital',name:h.name,sub:`${h.county} — PCR: ${h.pcr}`,action:()=>{
         showPage('learn',document.getElementById('btn-learn'));
         selLearn('pcr',document.querySelector('[data-lsec="pcr"]'));
+        setTimeout(()=>scrollToHospital(h.pcr),350);
       }}));
 
     if(!results.length){
@@ -361,6 +366,16 @@ function clearHomeSearch(){
   document.getElementById('homeSearchClear').style.display='none';
   document.getElementById('homeSearchResults').classList.remove('show');
   document.getElementById('homeSearchResults').innerHTML='';
+}
+
+function scrollToHospital(pcr){
+  const el=document.getElementById('hosp-'+pcr);
+  if(el){
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.transition='box-shadow 0.3s ease';
+    el.style.boxShadow='0 0 0 2px var(--primary)';
+    setTimeout(()=>{el.style.boxShadow='';},2000);
+  }
 }
 
 function scrollToTerm(termName){

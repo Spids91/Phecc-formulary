@@ -91,7 +91,7 @@ function buildDet(d) {
     if (typeof dose === 'string') return `<div class="dose-text">${dose.replace(/\n/g, '<br>')}</div>`;
     return Object.entries(dose).map(([k, v]) => `
       <div style="margin-bottom:8px">
-        <div style="font-size:11px;font-weight:600;color:var(--em-700);margin-bottom:3px">${k}</div>
+        <div style="font-size:11px;font-weight:600;color:var(--success);margin-bottom:3px">${k}</div>
         <div class="dose-text">${v.replace(/\n/g, '<br>')}</div>
       </div>`).join('');
   }
@@ -100,11 +100,11 @@ function buildDet(d) {
 
   return `
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:var(--em-50)">💊</div><div class="dst">Presentation</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--surf2)">💊</div><div class="dst">Presentation</div></div>
       <div class="dsb"><ul class="blist">${pres.map(p => `<li>${p}</li>`).join('')}</ul></div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:var(--em-50)">🛤</div><div class="dst">Routes of Administration</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--surf2)">🛤</div><div class="dst">Routes of Administration</div></div>
       <div class="dsb"><ul class="blist">${adm.map(a => `<li>${a}</li>`).join('')}</ul></div>
     </div>
     <div class="dsec">
@@ -129,7 +129,7 @@ function buildDet(d) {
       <div class="dsb"><ul class="blist">${d.sideEffects.map(s => `<li>${s}</li>`).join('')}</ul></div>
     </div>
     <div class="dsec">
-      <div class="dsh"><div class="sico" style="background:var(--em-50)">ℹ️</div><div class="dst">Additional Information</div></div>
+      <div class="dsh"><div class="sico" style="background:var(--surf2)">ℹ️</div><div class="dst">Additional Information</div></div>
       <div class="dsb"><div class="info-box">${d.additionalInfo}</div></div>
     </div>
     <div class="dsec">
