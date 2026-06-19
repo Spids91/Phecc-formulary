@@ -180,79 +180,74 @@ function renderQuizTab() {
   const done = isDailyDone();
   const now  = new Date();
   const dateStr = now.toLocaleDateString('en-IE', { day:'numeric', month:'long' });
-  const calEmoji = ['📅','📅','📅','📅','📅','📅','📅'][now.getDay()];
   const weakCount = (G.recentWrong||[]).length;
   const dueCount  = MEDS.filter(m => isDue(m.id) && (G.drugCorrect[m.id]||0) > 0).length;
 
-  document.getElementById('quizTabContent').innerHTML = `
-    <div class="daily-card${done?' done':''}" onclick="${done?'showToast(\'Come back tomorrow for a new set!\')':'startDaily()'}">
-      <div class="daily-top">
-        <div class="daily-icon">${calEmoji}</div>
-        <div class="daily-info">
-          <div class="daily-title">Daily Challenge</div>
-          <div class="daily-sub">5 questions · ${dateStr} · same for everyone</div>
-        </div>
-        <div class="daily-status">${done
-          ? '<span class="daily-done-badge">✓ Done</span>'
-          : '<span class="daily-start-btn">Start →</span>'}</div>
-      </div>
-      <div class="${done?'daily-done-msg':'daily-bonus-msg'}">${done
-        ? 'Come back tomorrow for a new set'
-        : '⚡ +15 XP bonus for completing today\'s challenge'}</div>
-    </div>
+  // Build HTML — NO nested quotes in onclick attributes
+  // All click handlers added via addEventListener after innerHTML set
+  let html = '';
 
-    <div class="quiz-mode-section-label">Quiz Modes</div>
-    <div class="quiz-mode-grid">
-      <div class="qmode-card" onclick="goSetup('standard',false)">
-        <div class="qmode-icon">📚</div>
-        <div class="qmode-name">Standard</div>
-        <div class="qmode-desc">Mixed difficulty questions</div>
-      </div>
-      <div class="qmode-card" onclick="goSetup('adaptive',true)">
-        <div class="qmode-icon">🧠</div>
-        <div class="qmode-name">Adaptive</div>
-        <div class="qmode-desc">Adjusts to your mastery level</div>
-      </div>
-      <div class="qmode-card${weakCount===0?' qmode-dim':''}" onclick="${weakCount>0?'goSetup(\'weakspots\',false)':'showToast(\'No weak spots yet — keep quizzing!\')'}">
-        <div class="qmode-icon">🎯</div>
-        <div class="qmode-name">Weak Spots</div>
-        <div class="qmode-desc">${weakCount>0?weakCount+' drug'+(weakCount>1?'s':'')+' to review':'No weak spots yet'}</div>
-      </div>
-      <div class="qmode-card" onclick="goSetup('timed',false)">
-        <div class="qmode-icon">⚡</div>
-        <div class="qmode-name">Timed</div>
-        <div class="qmode-desc">30 seconds per question</div>
-      </div>
-      <div class="qmode-card" onclick="goCategoryPicker()">
-        <div class="qmode-icon">🔬</div>
-        <div class="qmode-name">Category</div>
-        <div class="qmode-desc">Quiz a specific drug class</div>
-      </div>
-      <div class="qmode-card" onclick="goSetup('terms',false)">
-        <div class="qmode-icon">📖</div>
-        <div class="qmode-name">Medical Terms</div>
-        <div class="qmode-desc">${TERMS.length} terms</div>
-      </div>
-      <div class="qmode-card qmode-coming" onclick="showToast('Scenario Mode — coming soon')">
-        <div class="qmode-icon">🏥</div>
-        <div class="qmode-name">Scenario</div>
-        <div class="qmode-desc">Coming soon</div>
-        <div class="qmode-soon-badge">Soon</div>
-      </div>
-      <div class="qmode-card qmode-coming" onclick="showToast('Drug Comparison — coming soon')">
-        <div class="qmode-icon">💊</div>
-        <div class="qmode-name">Comparison</div>
-        <div class="qmode-desc">Coming soon</div>
-        <div class="qmode-soon-badge">Soon</div>
-      </div>
-    </div>
+  // Daily card — no onclick in HTML
+  html += '<div id="dailyChallengeCard" class="daily-card' + (done ? ' done' : '') + '">';
+  html += '<div class="daily-top">';
+  html += '<div class="daily-icon">📅</div>';
+  html += '<div class="daily-info">';
+  html += '<div class="daily-title">Daily Challenge</div>';
+  html += '<div class="daily-sub">5 questions · ' + dateStr + ' · same for everyone</div>';
+  html += '</div>';
+  html += '<div class="daily-status">' + (done ? '<span class="daily-done-badge">✓ Done</span>' : '<span class="daily-start-btn">Start →</span>') + '</div>';
+  html += '</div>';
+  html += '<div class="' + (done ? 'daily-done-msg' : 'daily-bonus-msg') + '">' + (done ? 'Come back tomorrow for a new set' : '\u26A1 +15 XP bonus for completing today\'s challenge') + '</div>';
+  html += '</div>';
 
-    ${dueCount > 0 ? `
-    <div class="review-banner" onclick="goSetup('review',false)">
-      <div class="review-banner-icon">🔁</div>
-      <div class="review-banner-text"><strong>${dueCount} drug${dueCount>1?'s':''} due for review</strong><br>Based on your spaced repetition schedule</div>
-      <div class="review-banner-arrow">→</div>
-    </div>` : ''}`;
+  // Mode grid
+  html += '<div class="quiz-mode-section-label">Quiz Modes</div>';
+  html += '<div class="quiz-mode-grid">';
+  html += '<div class="qmode-card" data-action="standard"><div class="qmode-icon">📚</div><div class="qmode-name">Standard</div><div class="qmode-desc">Mixed difficulty questions</div></div>';
+  html += '<div class="qmode-card" data-action="adaptive"><div class="qmode-icon">🧠</div><div class="qmode-name">Adaptive</div><div class="qmode-desc">Adjusts to your mastery level</div></div>';
+  html += '<div class="qmode-card' + (weakCount === 0 ? ' qmode-dim' : '') + '" data-action="weakspots"><div class="qmode-icon">🎯</div><div class="qmode-name">Weak Spots</div><div class="qmode-desc">' + (weakCount > 0 ? weakCount + ' drug' + (weakCount > 1 ? 's' : '') + ' to review' : 'No weak spots yet') + '</div></div>';
+  html += '<div class="qmode-card" data-action="timed"><div class="qmode-icon">⚡</div><div class="qmode-name">Timed</div><div class="qmode-desc">30 seconds per question</div></div>';
+  html += '<div class="qmode-card" data-action="category"><div class="qmode-icon">🔬</div><div class="qmode-name">Category</div><div class="qmode-desc">Quiz a specific drug class</div></div>';
+  html += '<div class="qmode-card" data-action="terms"><div class="qmode-icon">📖</div><div class="qmode-name">Medical Terms</div><div class="qmode-desc">' + TERMS.length + ' terms</div></div>';
+  html += '<div class="qmode-card qmode-coming" data-action="scenario"><div class="qmode-icon">🏥</div><div class="qmode-name">Scenario</div><div class="qmode-desc">Coming soon</div><div class="qmode-soon-badge">Soon</div></div>';
+  html += '<div class="qmode-card qmode-coming" data-action="comparison"><div class="qmode-icon">💊</div><div class="qmode-name">Comparison</div><div class="qmode-desc">Coming soon</div><div class="qmode-soon-badge">Soon</div></div>';
+  html += '</div>';
+
+  if (dueCount > 0) {
+    html += '<div id="reviewBanner" class="review-banner"><div class="review-banner-icon">🔁</div><div class="review-banner-text"><strong>' + dueCount + ' drug' + (dueCount > 1 ? 's' : '') + ' due for review</strong><br>Based on your spaced repetition schedule</div><div class="review-banner-arrow">→</div></div>';
+  }
+
+  document.getElementById('quizTabContent').innerHTML = html;
+
+  // Attach event listeners cleanly — no inline onclick needed
+  const dailyCard = document.getElementById('dailyChallengeCard');
+  if (dailyCard) {
+    dailyCard.addEventListener('click', function() {
+      if (done) { showToast('Come back tomorrow for a new set!'); }
+      else { startDaily(); }
+    });
+  }
+
+  document.querySelectorAll('.qmode-card[data-action]').forEach(card => {
+    card.addEventListener('click', function() {
+      const action = this.dataset.action;
+      switch(action) {
+        case 'standard':  goSetup('standard', false); break;
+        case 'adaptive':  goSetup('adaptive', true);  break;
+        case 'weakspots': weakCount > 0 ? goSetup('weakspots', false) : showToast('No weak spots yet — keep quizzing!'); break;
+        case 'timed':     goSetup('timed', false);    break;
+        case 'category':  goCategoryPicker();         break;
+        case 'terms':     goSetup('terms', false);    break;
+        case 'scenario':  showToast('Scenario Mode — coming soon'); break;
+        case 'comparison':showToast('Drug Comparison — coming soon'); break;
+      }
+    });
+  });
+
+  const reviewBanner = document.getElementById('reviewBanner');
+  if (reviewBanner) {
+    reviewBanner.addEventListener('click', function() { goSetup('review', false); });
+  }
 }
 
 // ── SETUP SCREENS ─────────────────────────────────────────────────────────────
@@ -292,23 +287,31 @@ function goSetup(mode, adaptive) {
 }
 
 function goCategoryPicker() {
-  document.getElementById('quizTabContent').innerHTML = `
-    <div class="quiz-back-sticky" onclick="renderQuizTab()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
-    </div>
-    <div class="pg-title">🔬 Category Quiz</div>
-    <div class="pg-sub">Pick a drug class to focus on</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      ${CATEGORIES.map(cat => {
-        const drugs = MEDS.filter(cat.fn);
-        const empty = drugs.length === 0;
-        return `<div class="cat-card${empty?' cat-empty':''}" ${empty?'':'onclick="selectCat(\''+cat.name+'\')"'}>
-          <div class="cat-icon">${cat.icon}</div>
-          <div class="cat-info"><div class="cat-name">${cat.name}</div><div class="cat-count">${drugs.length} drug${drugs.length!==1?'s':''}</div></div>
-          <div style="color:var(--text3)">→</div>
-        </div>`;
-      }).join('')}
-    </div>`;
+  let html = '';
+  html += '<div id="catPickerBack" class="quiz-back-sticky"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back</div>';
+  html += '<div class="pg-title">🔬 Category Quiz</div>';
+  html += '<div class="pg-sub">Pick a drug class to focus on</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:8px">';
+  CATEGORIES.forEach(cat => {
+    const drugs = MEDS.filter(cat.fn);
+    const empty = drugs.length === 0;
+    html += '<div class="cat-card' + (empty ? ' cat-empty' : '') + '" data-cat="' + cat.name + '">';
+    html += '<div class="cat-icon">' + cat.icon + '</div>';
+    html += '<div class="cat-info"><div class="cat-name">' + cat.name + '</div><div class="cat-count">' + drugs.length + ' drug' + (drugs.length !== 1 ? 's' : '') + '</div></div>';
+    html += '<div style="color:var(--text3)">→</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  document.getElementById('quizTabContent').innerHTML = html;
+
+  document.getElementById('catPickerBack').addEventListener('click', renderQuizTab);
+  document.querySelectorAll('.cat-card[data-cat]').forEach(card => {
+    const catName = card.dataset.cat;
+    const drugs = MEDS.filter(CATEGORIES.find(c => c.name === catName).fn);
+    if (drugs.length > 0) {
+      card.addEventListener('click', () => selectCat(catName));
+    }
+  });
 }
 
 function selectCat(name) {

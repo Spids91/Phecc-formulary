@@ -1000,3 +1000,13 @@ body { padding-bottom: calc(82px + var(--safe)); }
 .legal-body p  { font-size: var(--text-sm); color: var(--text2); line-height: 1.65; margin-bottom: var(--sp3); }
 .legal-body strong { color: var(--text); }
 .legal-meta { font-size: var(--text-xs); color: var(--text3); margin-top: var(--sp4); padding-top: var(--sp4); border-top: 1px solid var(--border); }
+
+/* ── MISSING TOKEN ALIASES ───────────────────────────────────────────── */
+/* --sl-300 used in donut legend, --red used in tally card */
+:root {
+  --sl-300: #CBD5E1;
+  --red: var(--error);
+}
+[data-theme="dark"] {
+  --sl-300: #475569;
+}

@@ -60,7 +60,7 @@ let G={
 };
 
 function loadG(){
-  try{const s=localStorage.getItem('tusMedicG10');if(s)G={...G,...JSON.parse(s)};}catch(e){}
+  try{const s=localStorage.getItem('tusMedicG101');if(s)G={...G,...JSON.parse(s)};}catch(e){}
   MEDS.forEach(m=>{
     if(!G.drugCorrect[m.id])G.drugCorrect[m.id]=0;
     if(G.notes[m.id]===undefined)G.notes[m.id]='';
@@ -72,8 +72,9 @@ function loadG(){
   if(!G.nextReview)G.nextReview={};
   if(!G.recentWrong)G.recentWrong=[];
   if(G.lastDailyDate===undefined)G.lastDailyDate=null;
+  if(!G.seenToday)G.seenToday={};
 }
-function saveG(){try{localStorage.setItem('tusMedicG10',JSON.stringify(G));}catch(e){}}
+function saveG(){try{localStorage.setItem('tusMedicG101',JSON.stringify(G));}catch(e){}}
 function getDM(id){return getMastery(G.drugCorrect[id]||0);}
 function todayKey(){return new Date().toISOString().slice(0,10);}
 
