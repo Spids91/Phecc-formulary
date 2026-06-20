@@ -50,9 +50,21 @@
         <div class="onb-icon">🧠</div>
         <div class="onb-title">Built to help you retain</div>
         <div class="onb-bullets">
-          <div class="onb-bullet"><span class="onb-bullet-label">🔁 Spaced repetition</span><span class="onb-bullet-desc">Revisit drugs just before you forget them</span></div>
-          <div class="onb-bullet"><span class="onb-bullet-label">📈 Adaptive difficulty</span><span class="onb-bullet-desc">Gets harder as your knowledge grows</span></div>
-          <div class="onb-bullet"><span class="onb-bullet-label">📅 Daily Challenge</span><span class="onb-bullet-desc">Five questions every day to stay sharp</span></div>
+          <div class="onb-bullet onb-bullet-tap" onclick="showOnbTip('spaced')">
+            <div class="onb-bullet-row"><span class="onb-bullet-label">🔁 Spaced repetition</span><span class="onb-bullet-hint">Tap to learn more</span></div>
+            <span class="onb-bullet-desc">Revisit drugs just before you forget them</span>
+            <div class="onb-tip" id="tip-spaced">The app tracks every drug you answer. Get one right and it waits longer before asking again. Get it wrong and it comes back sooner. Over time you spend more time on what you don't know.</div>
+          </div>
+          <div class="onb-bullet onb-bullet-tap" onclick="showOnbTip('adaptive')">
+            <div class="onb-bullet-row"><span class="onb-bullet-label">📈 Adaptive difficulty</span><span class="onb-bullet-hint">Tap to learn more</span></div>
+            <span class="onb-bullet-desc">Gets harder as your knowledge grows</span>
+            <div class="onb-tip" id="tip-adaptive">Early questions focus on indications and dosages. As your mastery grows the questions shift to mechanisms, contraindications and side effects — the things that separate a good clinician from a great one.</div>
+          </div>
+          <div class="onb-bullet onb-bullet-tap" onclick="showOnbTip('daily')">
+            <div class="onb-bullet-row"><span class="onb-bullet-label">📅 Daily Challenge</span><span class="onb-bullet-hint">Tap to learn more</span></div>
+            <span class="onb-bullet-desc">Five questions every day to stay sharp</span>
+            <div class="onb-tip" id="tip-daily">A short daily quiz that earns you bonus XP. Everyone gets the same questions each day. Complete it to build your streak — miss a day and the streak resets.</div>
+          </div>
         </div>
       </div>
 
@@ -331,7 +343,7 @@
       </div>
       <div id="resNormalBtns">
         <button class="btn-pri" onclick="newQuiz()" style="margin-bottom:10px">New Quiz</button>
-        <button class="btn-sec" onclick="resetQuiz()">Change Settings</button>
+        <button class="btn-sec" onclick="resetQuiz()">Choose Mode</button>
       </div>
     </div>
   </div>

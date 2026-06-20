@@ -270,9 +270,23 @@ function finishOnboarding(){
   document.getElementById('onbOverlay').classList.remove('show');
   G.onboardingDone=true;saveG();
   haptic();
-  // First time: launch a 5-question intro quiz (doesn't use daily challenge)
+  // Show quiz tab immediately to prevent flash of home page
   showPage('quiz',document.getElementById('btn-quiz'));
-  setTimeout(()=>launchIntroQuiz(),300);
+  scrollTop();
+  // Launch intro quiz on next frame so page transition is complete
+  requestAnimationFrame(()=>requestAnimationFrame(()=>launchIntroQuiz()));
+}
+
+// Onboarding feature card tooltips
+function showOnbTip(id){
+  const tip=document.getElementById('tip-'+id);
+  if(!tip)return;
+  const isOpen=tip.classList.contains('show');
+  // Close all tips first
+  document.querySelectorAll('.onb-tip').forEach(t=>t.classList.remove('show'));
+  // Toggle this one
+  if(!isOpen)tip.classList.add('show');
+  haptic();
 }
 
 // Allow re-viewing onboarding from settings

@@ -494,7 +494,7 @@ function newQuiz() {
   QZ.fmt = QZ.lastFmt; QZ.adaptive = QZ.lastAdaptive;
   launchFromSetup();
 }
-function resetQuiz() { exitToTab(); }
+function resetQuiz() { exitToTab(); scrollTop(); window.scrollTo({top:0,behavior:'instant'}); }
 function confirmResetQuiz() {
   showConfirm(
     'End Quiz?',

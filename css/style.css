@@ -1251,12 +1251,38 @@ ul { list-style: none; }
   background: var(--primary);
   border-radius: 50%;
   width: 52px; height: 52px;
-  padding: 0;
   box-shadow: 0 4px 16px rgba(37,99,235,.5);
   color: #fff !important;
   flex: 0 0 52px;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 0;
+  font-size: 0;
 }
 .nb.nb-quiz svg { width: 24px; height: 24px; stroke-width: 2; }
 .nb.nb-quiz::after { display: none; }
 .nb.nb-quiz.active { background: var(--primary-dark); }
-.nb.nb-quiz .nb-label { display: none; }
+/* Quiz label sits below the pill at same level as other labels */
+.nb.nb-quiz::before {
+  content: 'Quiz';
+  position: absolute;
+  bottom: -16px;
+  left: 50%; transform: translateX(-50%);
+  font-size: 9px; font-weight: 600; letter-spacing: .2px;
+  color: rgba(255,255,255,.6);
+  white-space: nowrap;
+}
+
+/* ── ONBOARDING TAPPABLE BULLETS ─────────────────────────────────────────── */
+.onb-bullet-tap { cursor: pointer; transition: background var(--dur-fast) var(--ease); }
+.onb-bullet-tap:active { background: var(--border); }
+.onb-bullet-row { display: flex; justify-content: space-between; align-items: center; }
+.onb-bullet-hint { font-size: 10px; color: var(--primary); font-weight: 600; opacity: .8; }
+.onb-tip {
+  display: none; font-size: 12px; color: var(--text2); line-height: 1.6;
+  margin-top: var(--sp2); padding-top: var(--sp2);
+  border-top: 1px solid var(--border);
+  animation: pgIn .2s var(--ease);
+}
+.onb-tip.show { display: block; }
+
