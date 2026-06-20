@@ -202,7 +202,7 @@ let QZ = {
   mode: 'standard', scope: 'all', category: null, adaptive: false,
   fmt: 'mc',  // mc or fc
   qs: [], idx: 0, correct: 0, answered: false, flipped: false,
-  xpThis: 0, isTerms: false, isDaily: false, isTimed: false,
+  xpThis: 0, isTerms: false, isDaily: false, isTimed: false, isIntro: false,
   streak: 0, wrongAnswers: [],
   fcXpEarned: 0,  // flashcard XP earned this session — capped to discourage gaming
   timeLeft: 30, timerRef: null,
@@ -456,7 +456,7 @@ function launch(qs, isTimed=false, isTerms=false, isDaily=false) {
   QZ.lastFmt = QZ.fmt; QZ.lastAdaptive = QZ.adaptive;
   // Reset state
   Object.assign(QZ, { qs, idx:0, correct:0, answered:false, flipped:false,
-    xpThis:0, fcXpEarned:0, isTerms, isDaily, isTimed, streak:0, wrongAnswers:[],
+    xpThis:0, fcXpEarned:0, isTerms, isDaily, isTimed, isIntro:false, streak:0, wrongAnswers:[],
     timeLeft:30, timerRef:null });
   showQuizActive();
   if (QZ.fmt === 'fc') {
@@ -466,6 +466,21 @@ function launch(qs, isTimed=false, isTerms=false, isDaily=false) {
     document.getElementById('mcMode').style.display = 'block';
     renderMC();
   }
+}
+
+// Intro quiz — 5 questions, MC, doesn't consume daily challenge, shows "Start Studying" at end
+function launchIntroQuiz() {
+  QZ.mode = 'standard'; QZ.scope = 'all'; QZ.fmt = 'mc'; QZ.adaptive = false;
+  const qs = makeDrugQs(MEDS, 5, false);
+  window.scrollTo({top:0,behavior:'instant'});
+  QZ.lastMode = QZ.mode; QZ.lastScope = QZ.scope;
+  QZ.lastFmt = QZ.fmt; QZ.lastAdaptive = QZ.adaptive;
+  Object.assign(QZ, { qs, idx:0, correct:0, answered:false, flipped:false,
+    xpThis:0, fcXpEarned:0, isTerms:false, isDaily:false, isTimed:false, isIntro:true,
+    streak:0, wrongAnswers:[], timeLeft:30, timerRef:null });
+  showQuizActive();
+  document.getElementById('mcMode').style.display = 'block';
+  renderMC();
 }
 
 function exitToTab() {
@@ -703,4 +718,14 @@ function showResults() {
     }
   }
   renderHome();
+  // Show correct end-screen buttons
+  const introBtn = document.getElementById('resIntroBtn');
+  const normalBtns = document.getElementById('resNormalBtns');
+  if (QZ.isIntro) {
+    if (introBtn) introBtn.style.display = 'block';
+    if (normalBtns) normalBtns.style.display = 'none';
+  } else {
+    if (introBtn) introBtn.style.display = 'none';
+    if (normalBtns) normalBtns.style.display = 'block';
+  }
 }

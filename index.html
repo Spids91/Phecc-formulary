@@ -181,6 +181,10 @@
   </div>
   <div class="gsearch-results" id="homeSearchResults"></div>
 
+  <!-- Daily Challenge — HERO element, shown first -->
+  <div class="home-section-label">Daily Challenge</div>
+  <div id="homeDailyCard"></div>
+
   <!-- Level card -->
   <div class="home-level-card" id="homeLevelCard" onclick="goProgress()">
     <div class="hlc-left">
@@ -201,10 +205,6 @@
     <div class="hsr-streak" id="homeStreakNum">0 day streak</div>
     <div class="hsr-freezes" id="homeFreezes"></div>
   </div>
-
-  <!-- Daily Challenge -->
-  <div class="home-section-label">Daily Challenge</div>
-  <div id="homeDailyCard"></div>
 
   <!-- Drug of the Day -->
   <div class="home-section-label">Drug of the Day</div>
@@ -326,8 +326,13 @@
       </div>
       <button class="xp-earned-btn" id="xpEarnedBtn" onclick="goProgress()">⚡ +0 XP — tap to see progress</button>
       <div id="wrongBreakdown" style="display:none;margin-bottom:16px;text-align:left"></div>
-      <button class="btn-pri" onclick="newQuiz()" style="margin-bottom:10px">New Quiz</button>
-      <button class="btn-sec" onclick="resetQuiz()">Change Settings</button>
+      <div id="resIntroBtn" style="display:none">
+        <button class="btn-pri" onclick="showPage('quiz',document.getElementById('btn-quiz'));scrollTop()" style="margin-bottom:10px">Start Studying →</button>
+      </div>
+      <div id="resNormalBtns">
+        <button class="btn-pri" onclick="newQuiz()" style="margin-bottom:10px">New Quiz</button>
+        <button class="btn-sec" onclick="resetQuiz()">Change Settings</button>
+      </div>
     </div>
   </div>
 </div>
@@ -448,7 +453,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h13a1 1 0 0 1 1 1v14.5M6 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14v-2.5H6a1 1 0 0 1 0-2h14"/></svg>
     Reference
   </button>
-  <button class="nb" id="btn-quiz" onclick="showPage('quiz',this);scrollTop()">
+  <button class="nb nb-quiz" id="btn-quiz" onclick="showPage('quiz',this);scrollTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.8" fill="currentColor" stroke="none"/></svg>
     Quiz
   </button>

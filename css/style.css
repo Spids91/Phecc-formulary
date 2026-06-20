@@ -1243,3 +1243,20 @@ ul { list-style: none; }
 }
 .confirm-ok:active { opacity: .85; }
 .confirm-ok.danger { background: var(--error); }
+
+/* ── QUIZ NAV BUTTON — raised hero button ─────────────────────────────────── */
+.nb.nb-quiz {
+  position: relative;
+  margin-top: -14px;
+  background: var(--primary);
+  border-radius: 50%;
+  width: 52px; height: 52px;
+  padding: 0;
+  box-shadow: 0 4px 16px rgba(37,99,235,.5);
+  color: #fff !important;
+  flex: 0 0 52px;
+}
+.nb.nb-quiz svg { width: 24px; height: 24px; stroke-width: 2; }
+.nb.nb-quiz::after { display: none; }
+.nb.nb-quiz.active { background: var(--primary-dark); }
+.nb.nb-quiz .nb-label { display: none; }

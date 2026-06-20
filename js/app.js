@@ -245,7 +245,7 @@ function updateOnboarding(){
   // Back button visibility
   document.getElementById('onbBack').style.visibility=onbStep===0?'hidden':'visible';
   // Next button label
-  document.getElementById('onbNext').textContent=onbStep===ONB_TOTAL-1?'Get Started':'Next';
+  document.getElementById('onbNext').textContent=onbStep===ONB_TOTAL-1?'Start First Quiz →':'Next';
 }
 
 function onbNext(){
@@ -270,8 +270,9 @@ function finishOnboarding(){
   document.getElementById('onbOverlay').classList.remove('show');
   G.onboardingDone=true;saveG();
   haptic();
-  // Land on home
-  showPage('home',document.getElementById('btn-home'));
+  // First time: launch a 5-question intro quiz (doesn't use daily challenge)
+  showPage('quiz',document.getElementById('btn-quiz'));
+  setTimeout(()=>launchIntroQuiz(),300);
 }
 
 // Allow re-viewing onboarding from settings
