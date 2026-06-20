@@ -1090,6 +1090,14 @@ ul { list-style: none; }
   animation: pgIn .2s var(--ease);
 }
 .ql-reveal.open .ql-answer { display: block; }
+.ql-header-right { display: flex; align-items: center; gap: var(--sp2); }
+.ql-reveal-all {
+  font-size: 11px; font-weight: 600; color: var(--primary);
+  background: var(--primary-light); border: none;
+  border-radius: 20px; padding: 3px 10px; cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+.ql-reveal-all:active { background: var(--primary-mid); }
 
 /* ── DETAIL MASTERY BADGE ────────────────────────────────────────────── */
 .det-mbadge-unseen     { background: rgba(203,213,225,.18); color: #CBD5E1; }

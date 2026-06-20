@@ -53,7 +53,7 @@
           <div class="onb-bullet onb-bullet-tap" onclick="showOnbTip('spaced')">
             <div class="onb-bullet-row"><span class="onb-bullet-label">🔁 Spaced repetition</span><span class="onb-bullet-hint">Tap to learn more</span></div>
             <span class="onb-bullet-desc">Revisit drugs just before you forget them</span>
-            <div class="onb-tip" id="tip-spaced">The app tracks every drug you answer. Get one right and it waits longer before asking again. Get it wrong and it comes back sooner. Over time you spend more time on what you don't know.</div>
+            <div class="onb-tip" id="tip-spaced">Every question you answer is remembered. Drugs you know well appear less often. Drugs you struggle with come back sooner. Over time the app focuses your study where it's needed most.</div>
           </div>
           <div class="onb-bullet onb-bullet-tap" onclick="showOnbTip('adaptive')">
             <div class="onb-bullet-row"><span class="onb-bullet-label">📈 Adaptive difficulty</span><span class="onb-bullet-hint">Tap to learn more</span></div>
@@ -85,6 +85,11 @@
     <div class="onb-actions">
       <button class="onb-back" id="onbBack" onclick="onbPrev()" style="visibility:hidden">Back</button>
       <button class="onb-next" id="onbNext" onclick="onbNext()">Next</button>
+    </div>
+    <!-- Final panel only: two choices -->
+    <div class="onb-final-actions" id="onbFinalActions" style="display:none">
+      <button class="btn-pri" onclick="finishOnboarding()" style="width:100%;margin-bottom:10px">Start First Quiz →</button>
+      <button class="btn-sec" onclick="skipToHome()" style="width:100%">Get Started</button>
     </div>
   </div>
 </div>

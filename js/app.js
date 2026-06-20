@@ -268,8 +268,11 @@ function updateOnboarding(){
   });
   // Back button visibility
   document.getElementById('onbBack').style.visibility=onbStep===0?'hidden':'visible';
-  // Next button label
-  document.getElementById('onbNext').textContent=onbStep===ONB_TOTAL-1?'Start First Quiz →':'Next';
+  // On final panel: show two-button choice, hide single Next button
+  const isFinal = onbStep===ONB_TOTAL-1;
+  document.getElementById('onbNext').style.display = isFinal ? 'none' : 'block';
+  document.getElementById('onbFinalActions').style.display = isFinal ? 'block' : 'none';
+  if(!isFinal) document.getElementById('onbNext').textContent='Next';
 }
 
 function onbNext(){
@@ -295,11 +298,20 @@ function finishOnboarding(){
   notifyModalState(false);
   G.onboardingDone=true;saveG();
   haptic();
-  // Show quiz tab immediately to prevent flash of home page
+  // Launch intro quiz
   showPage('quiz',document.getElementById('btn-quiz'));
   scrollTop();
-  // Launch intro quiz on next frame so page transition is complete
   requestAnimationFrame(()=>requestAnimationFrame(()=>launchIntroQuiz()));
+}
+
+function skipToHome(){
+  document.getElementById('onbOverlay').classList.remove('show');
+  notifyModalState(false);
+  G.onboardingDone=true;saveG();
+  haptic();
+  // Land on home page
+  showPage('home',document.getElementById('btn-home'));
+  scrollTop();
 }
 
 // Onboarding feature card tooltips
