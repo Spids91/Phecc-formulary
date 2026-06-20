@@ -75,7 +75,7 @@ const LEGAL = {
       <h2>GDPR</h2>
       <p>As all data is stored locally on your device and no personal data is collected or processed by the developer, the General Data Protection Regulation (GDPR) data processing obligations do not apply to this app in its current form.</p>
       <h2>Contact</h2>
-      <p>For privacy queries, contact the developer via the GitHub repository.</p>
+      <p>For privacy queries, contact the developer at the email address listed in the app.</p>
       <p class="legal-meta">Last updated: June 2026 · © Keith O'Reilly 2026</p>`
   },
   disclaimer: {
@@ -96,7 +96,7 @@ const LEGAL = {
       <h2>v1.0.0</h2>
       <p>Settings panel with dark mode, legal documents and version info. Complete quiz engine rewrite. Terms of Service and Privacy Policy. Streak XP multiplier. Hospital search scrolls to result. Drug of the Day full shuffle. Theme audit — all token references corrected.</p>
       <h2>v0.9.1</h2>
-      <p>Floating pill tab bar. iOS swipe animation on drug detail. Chart y-axis. Standard and Adaptive as separate quiz modes. Real date on daily challenge. Rookie level card fixed. Privacy policy added.</p>
+      <p>Floating pill tab bar. Chart y-axis. Standard and Adaptive as separate quiz modes. Real date on daily challenge. Rookie level card fixed. Privacy policy added.</p>
       <h2>v0.9.0</h2>
       <p>Universal design system — Inter font, cobalt blue primary, deep green success, spacing tokens, type scale.</p>
       <h2>v0.8.0</h2>

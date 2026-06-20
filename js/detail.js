@@ -1,5 +1,14 @@
 // ─── DETAIL.JS ────────────────────────────────────────────────────────────────
 
+// Debounced note saving — waits 800ms after last keystroke before writing to localStorage
+let _noteTimer=null;
+function noteDebounce(id,val){
+  G.notes[id]=val;
+  clearTimeout(_noteTimer);
+  _noteTimer=setTimeout(saveG,800);
+}
+
+
 function openDet(id) {
   const d = MEDS.find(m => m.id === id);
   if (!d) return;
@@ -97,7 +106,7 @@ function buildDet(d) {
       <div class="dsb">
         <textarea class="notes-area" id="note-${d.id}"
           placeholder="Add your own notes, mnemonics, clinical pearls…"
-          oninput="G.notes[${d.id}]=this.value;saveG()">${noteVal}</textarea>
+          oninput="noteDebounce(${d.id},this.value)">${noteVal}</textarea>
         <div class="notes-hint">Notes save automatically</div>
       </div>
     </div>`;

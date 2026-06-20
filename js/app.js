@@ -59,7 +59,8 @@ let G={
   nextReview:{},
   recentWrong:[],
   lastDailyDate:null,
-  fcXpDate:null,fcXpToday:0
+  fcXpDate:null,fcXpToday:0,
+  seenToday:{}
 };
 
 function loadG(){
@@ -79,7 +80,17 @@ function loadG(){
   if(G.fcXpToday===undefined)G.fcXpToday=0;
   if(!G.seenToday)G.seenToday={};
 }
-function saveG(){try{localStorage.setItem('tusMedicG101',JSON.stringify(G));}catch(e){}}
+function saveG(){
+  try{
+    localStorage.setItem('tusMedicG101',JSON.stringify(G));
+  }catch(e){
+    // Storage full or unavailable — notify user once per session
+    if(!saveG._warned){
+      saveG._warned=true;
+      showToast('⚠️ Could not save progress — storage may be full');
+    }
+  }
+}
 function getDM(id){return getMastery(G.drugCorrect[id]||0);}
 function todayKey(){return new Date().toISOString().slice(0,10);}
 
@@ -452,9 +463,18 @@ function confirmReset(){
     'This will erase all your XP, streaks and mastery. This cannot be undone.',
     ()=>{
       const ts=G.trackingStart||todayKey();
-      G={xp:0,streak:0,lastDate:null,quizzes:0,totalQ:0,totalCorrect:0,drugCorrect:{},notes:{},
-         disclaimerDone:G.disclaimerDone,onboardingDone:G.onboardingDone,seenDrugs:[],earnedBadges:[],freezeTokens:1,freezesUsed:0,
-         dailyLog:{},trackingStart:ts};
+      G={
+        xp:0,streak:0,lastDate:null,quizzes:0,totalQ:0,totalCorrect:0,
+        drugCorrect:{},notes:{},
+        disclaimerDone:G.disclaimerDone,onboardingDone:G.onboardingDone,
+        seenDrugs:[],earnedBadges:[],
+        freezeTokens:1,freezesUsed:0,
+        dailyLog:{},trackingStart:ts,
+        nextReview:{},recentWrong:[],
+        lastDailyDate:null,
+        fcXpDate:null,fcXpToday:0,
+        seenToday:{}
+      };
       MEDS.forEach(m=>{G.drugCorrect[m.id]=0;G.notes[m.id]='';});
       saveG();updateHdr();updateStats();renderDonut();renderChart();renderDrugList();renderHome();
       showToast('Progress reset');
@@ -539,15 +559,6 @@ function gsrClick(i,resultsId){
     el.innerHTML='';
     el._actions[i]();
   }
-}
-
-function clearSearch(){
-  document.getElementById('searchInput').value='';
-  document.getElementById('searchClear').style.display='none';
-  document.getElementById('gsearchResults').classList.remove('show');
-  document.getElementById('gsearchResults').innerHTML='';
-  refQ='';
-  renderDrugList();
 }
 
 function clearHomeSearch(){

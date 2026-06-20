@@ -1011,6 +1011,14 @@ ul { list-style: none; }
   background: var(--hdr-bg);
   flex-shrink: 0;
 }
+.det-status-spacer {
+  height: env(safe-area-inset-top, 0px);
+  background: var(--hdr-bg);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 11;
+}
 .legal-hdr {
   display: flex; align-items: center; gap: var(--sp3);
   padding: var(--sp3) var(--sp4);

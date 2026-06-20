@@ -1,18 +1,23 @@
 // ─── HOME.JS ──────────────────────────────────────────────────────────────────
+let _dotdCache=null;
+let _dotdDay=-1;
 function getDotd(){
   // Shuffles through all 46 drugs before repeating any
   // Uses the day number to pick from a deterministic shuffle sequence
   const day=Math.floor(Date.now()/86400000);
   const cycle=Math.floor(day/MEDS.length); // which full cycle we're in
   const pos=day%MEDS.length;              // position within current cycle
-  // Seeded shuffle for this cycle so order changes each time through
+  // Seeded shuffle — Mulberry32 PRNG for uniform distribution
   const indices=[...Array(MEDS.length).keys()];
+  let seed32=(cycle*1664525+1013904223)>>>0;
+  function rand32(){seed32=Math.imul(seed32^seed32>>>15,seed32|1)^(seed32^seed32>>>7)*Math.imul(seed32|61,seed32);return(seed32>>>0)/4294967296;}
   for(let i=indices.length-1;i>0;i--){
-    const seed=cycle*997+i*31+7;
-    const j=Math.abs(Math.sin(seed)*10000)%( i+1)|0;
+    const j=Math.floor(rand32()*(i+1));
     [indices[i],indices[j]]=[indices[j],indices[i]];
   }
-  return MEDS[indices[pos]];
+  const result=MEDS[indices[pos]];
+  _dotdCache=result; _dotdDay=day;
+  return result;
 }
 function openDotd(){
   const d=getDotd();
@@ -87,8 +92,8 @@ function renderHome(){
     }
   }
 
-  // Drug of the Day
-  const d=getDotd();
+  // Drug of the Day (getDotd result cached — was being called twice per render)
+  const d=_dotdCache||getDotd();
   document.getElementById('dotdName').textContent=d.name;
   document.getElementById('dotdClass').textContent=d.classification;
   document.getElementById('dotdFact').textContent=d.quizHints.keyFact;

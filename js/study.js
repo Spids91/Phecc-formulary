@@ -45,8 +45,8 @@ function clearStudySearch(){
 
 // ── MEDICAL TERMS ─────────────────────────────────────────────────────────────
 const TERM_CATEGORIES=[
-  {name:'Cardiovascular',icon:'❤️',terms:['Angina','Arrhythmia','Asystole','Bradycardia','Cardiac Tamponade','Cardiogenic Shock','Defibrillation','Diastole','Fibrillation','Hypertension','Hypertensive Crisis','Hypotension','Myocardial Infarction (MI)','Palpitation','Pericarditis','Sinus Rhythm','Systole','Tachycardia','Thrombosis','Torsades de Pointes','Ventricular Fibrillation (VF)','Ventricular Tachycardia (VT)']},
-  {name:'Respiratory',icon:'🫁',terms:['Apnoea','Asphyxia','Bronchospasm','Croup','Dyspnoea','Hyperventilation','Pneumothorax','Pulmonary Embolism (PE)','Pulmonary Oedema','Stridor','Tachypnoea','Tension Pneumothorax','Wheeze']},
+  {name:'Cardiovascular',icon:'❤️',terms:['Angina','Arrhythmia','Asystole','Bradycardia','Cardiac Tamponade','Cardiogenic Shock','Defibrillation','Diastole','Fibrillation','Hypertension','Hypertensive Crisis','Hypotension','Myocardial Infarction (MI)','Palpitation','Pericarditis','Sinus Rhythm','Systole','Tachycardia','Thrombosis','Torsades de Pointes','Ventricular Fibrillation (VF)','Ventricular Tachycardia (VT)','Dysrhythmia']},
+  {name:'Respiratory',icon:'🫁',terms:['Apnoea','Asphyxia','Bronchospasm','Croup','Dyspnoea','Hyperventilation','Pneumothorax','Pulmonary Embolism (PE)','Pulmonary Oedema','Stridor','Tachypnoea','Tension Pneumothorax','Wheeze','Anoxia','Cyanosis','Laryngospasm']},
   {name:'Neurology',icon:'🧠',terms:['Ataxia','Cerebrovascular Accident (CVA)','Coma','Convulsion','Dissociation','Dystonia','Lethargy','Meningism','Meningitis','Paraesthesia','Seizure','Syncope','Transient Ischaemic Attack (TIA)','Vertigo']},
   {name:'Metabolic & Endocrine',icon:'⚗️',terms:['Acidosis','Alkalosis','Dehydration','Hyperglycaemia','Hyperkalaemia','Hyperthermia','Hypoglycaemia','Hypokalaemia','Hypothermia','Pyrexia']},
   {name:'Haematology & Bleeding',icon:'🩸',terms:['Anaemia','Haematemesis','Haematoma','Haematuria','Haemolysis','Haemoptysis','Haemorrhage','Haemostasis']},
@@ -55,7 +55,7 @@ const TERM_CATEGORIES=[
   {name:'Musculoskeletal & Trauma',icon:'🦴',terms:['Crepitus','Rhabdomyolysis','Trauma']},
   {name:'Obstetric',icon:'🤱',terms:['Eclampsia','Pre-eclampsia']},
   {name:'Pharmacology & Drug Terms',icon:'💊',terms:['Analgesia','Antipyretic','Contraindication','Dysuria','Extravasation','Pruritus']},
-  {name:'General Clinical',icon:'🏥',terms:['Acute','Aetiology','Auscultation','Capillary Refill Time (CRT)','Cellulitis','Chronic','Constriction','Decompensation','Diaphoresis','Dilatation','Embolism','Epistaxis','Exacerbation','Hypoxia','Idiopathic','Infarction','Ischaemia','Malaise','Necrosis','Neurogenic Shock','Orthopnoea','Pallor','Perfusion','Periorbital','Shock','Subcutaneous','Tinnitus','Triage','Urticaria','Vasoconstriction','Vasodilation']}
+  {name:'General Clinical',icon:'🏥',terms:['Acute','Aetiology','Auscultation','Capillary Refill Time (CRT)','Cellulitis','Chronic','Constriction','Decompensation','Diaphoresis','Dilatation','Embolism','Epistaxis','Exacerbation','Hypoxia','Idiopathic','Infarction','Ischaemia','Malaise','Necrosis','Neurogenic Shock','Orthopnoea','Pallor','Perfusion','Periorbital','Shock','Subcutaneous','Tinnitus','Triage','Urticaria','Vasoconstriction','Vasodilation','Anaphylaxis','Sepsis']}
 ];
 
 function termCardHtml(t){
@@ -103,8 +103,17 @@ function attachTermHandlers(container){
 }
 
 function toggleTerm(el){
-  document.querySelectorAll('.term-card.open').forEach(c=>{if(c!==el)c.classList.remove('open');});
-  el.classList.toggle('open');
+  const wasOpen=el.classList.contains('open');
+  document.querySelectorAll('.term-card.open').forEach(c=>c.classList.remove('open'));
+  if(!wasOpen){
+    el.classList.add('open');
+    // Scroll the card header to just below the page header — same pattern as question bank
+    setTimeout(()=>{
+      const top=el.getBoundingClientRect().top+window.scrollY;
+      const hdrH=document.querySelector('.hdr')?.offsetHeight||56;
+      window.scrollTo({top:top-hdrH-8,behavior:'smooth'});
+    },50);
+  }
   haptic();
 }
 
