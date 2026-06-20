@@ -128,12 +128,14 @@ function openLegal(key) {
   body.scrollTop = 0;  // always start at top
   const modal = document.getElementById('legalModal');
   modal.classList.add('open');
+  notifyModalState(true);
   haptic();
 }
 
 function closeLegal() {
   const modal = document.getElementById('legalModal');
   modal.classList.remove('open');
+  notifyModalState(false);
   // Brief pointer-events pause prevents ghost taps on close
   modal.style.pointerEvents = 'none';
   setTimeout(() => { modal.style.pointerEvents = ''; }, 300);

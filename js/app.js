@@ -122,6 +122,7 @@ function showLevelUp(level){
 function closeLevelUp(){
   const overlay=document.getElementById('levelUpOverlay');
   if(overlay)overlay.classList.remove('show');
+  notifyModalState(false);
 }
 
 // Streak freeze
@@ -169,9 +170,10 @@ function showConfirm(title, msg, onOK, isDanger=false){
   const okBtn=document.getElementById('confirmOK');
   okBtn.className='confirm-ok'+(isDanger?' danger':'');
   modal.style.display='flex';
+  notifyModalState(true);
   // Wire buttons — replace each time to avoid stacking listeners
   const cancelBtn=document.getElementById('confirmCancel');
-  const close=()=>{ modal.style.display='none'; };
+  const close=()=>{ modal.style.display='none'; notifyModalState(false); };
   okBtn.onclick=()=>{ close(); onOK(); };
   cancelBtn.onclick=close;
   modal.onclick=(e)=>{ if(e.target===modal)close(); };
@@ -216,34 +218,18 @@ function loadTheme(){
 
 function checkOnline(){document.getElementById('offlineBar').classList.toggle('show',!navigator.onLine);}
 
-// Prevent WKWebView scroll freeze on modal overlays
-// When a fixed overlay is visible, block touchmove from reaching the native scroll handler
-function initModalScrollFix() {
-  const preventScroll = (e) => {
-    // Allow scrolling inside elements that are meant to scroll
-    let el = e.target;
-    while (el && el !== document.body) {
-      const style = window.getComputedStyle(el);
-      const overflow = style.overflow + style.overflowY;
-      if (overflow.includes('auto') || overflow.includes('scroll')) {
-        return; // let it scroll
-      }
-      el = el.parentElement;
-    }
-    e.preventDefault();
-  };
-
-  // Apply to all fixed overlays that shouldn't scroll
-  ['disclaimerModal', 'settingsPanel', 'confirmModal', 'levelUpOverlay', 'legalModal', 'onbOverlay'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('touchmove', preventScroll, { passive: false });
-    }
-  });
+// Modal state bridge — notifies the iOS native layer when a modal opens or closes.
+// Swift uses this to disable WKWebView's scroll gesture recogniser while a modal is active,
+// which prevents the scroll-then-tap freeze in WKWebView.
+function notifyModalState(isOpen) {
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.modalState) {
+    window.webkit.messageHandlers.modalState.postMessage({ open: isOpen });
+  }
 }
 
 function dismissDisclaimer(){
   document.getElementById('disclaimerModal').style.display='none';
+  notifyModalState(false);
   G.disclaimerDone=true;saveG();
   // Show onboarding next if not yet seen
   if(!G.onboardingDone)startOnboarding();
@@ -257,6 +243,7 @@ function startOnboarding(){
   onbStep=0;
   updateOnboarding();
   document.getElementById('onbOverlay').classList.add('show');
+  notifyModalState(true);
 }
 
 function updateOnboarding(){
@@ -294,6 +281,7 @@ function onbPrev(){
 
 function finishOnboarding(){
   document.getElementById('onbOverlay').classList.remove('show');
+  notifyModalState(false);
   G.onboardingDone=true;saveG();
   haptic();
   // Show quiz tab immediately to prevent flash of home page
@@ -324,6 +312,7 @@ function checkDisclaimer(){
   if(!G.disclaimerDone){
     // New user: show disclaimer first; onboarding follows on dismiss
     document.getElementById('disclaimerModal').style.display='flex';
+    notifyModalState(true);
   }else if(!G.onboardingDone){
     // Existing user who hasn't seen onboarding (e.g. after this update)
     startOnboarding();
@@ -583,8 +572,6 @@ window.addEventListener('online',checkOnline);
 window.addEventListener('offline',checkOnline);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDet();});
 loadG();loadTheme();checkOnline();checkDisclaimer();updateHdr();
-// Run after DOM is fully parsed (scripts load at end of body)
-initModalScrollFix();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 function updateDarkToggle(){
