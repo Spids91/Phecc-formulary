@@ -776,6 +776,23 @@ ul { list-style: none; }
 .hosp-num-val { font-size: var(--text-xs); font-weight: 600; color: var(--primary); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .hosp-num-val:active { opacity: .7; }
 .hosp-num-val.na { color: var(--text3); font-weight: 400; cursor: default; }
+.term-cat-wrap { margin-bottom: var(--sp2); border-radius: var(--r12); overflow: hidden; border: 1px solid var(--border); }
+.term-cat-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp3) var(--sp4); cursor: pointer;
+  background: var(--surf); border-bottom: none;
+  transition: background var(--dur-fast) var(--ease);
+  margin-bottom: 0;
+}
+.term-cat-toggle:active { background: var(--surf2); }
+.term-cat-left { display: flex; align-items: center; gap: var(--sp2); font-size: var(--text-sm); font-weight: 700; color: var(--text); }
+.term-cat-meta { display: flex; align-items: center; gap: var(--sp2); }
+.term-cat-count { font-size: 11px; font-weight: 600; color: var(--text3); background: var(--surf2); border-radius: 20px; padding: 2px 8px; }
+.term-cat-chevron { font-size: 18px; color: var(--text3); transition: transform var(--dur-fast) var(--ease); display: inline-block; }
+.term-cat-wrap.open .term-cat-chevron { transform: rotate(90deg); }
+.term-cat-wrap.open .term-cat-toggle { border-bottom: 1px solid var(--border); }
+.term-cat-body { display: none; padding: var(--sp2); }
+.term-cat-wrap.open .term-cat-body { display: block; }
 .term-cat-header { font-size: var(--text-sm); font-weight: 700; color: var(--text); padding: var(--sp3) 0 var(--sp2); border-bottom: 2px solid var(--primary); margin-bottom: var(--sp2); display: flex; align-items: center; gap: var(--sp2); }
 .term-cat-icon { font-size: 15px; }
 .term-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r12); margin-bottom: var(--sp2); overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; box-shadow: var(--shadow); transition: box-shadow var(--dur-fast) var(--ease); }

@@ -82,14 +82,38 @@ function termCardHtml(t){
 
 function renderTerms(){
   const getTerm=name=>TERMS.find(t=>t.term===name);
-  return TERM_CATEGORIES.map(cat=>{
+  return TERM_CATEGORIES.map((cat,i)=>{
     const catTerms=cat.terms.map(getTerm).filter(Boolean);
     if(!catTerms.length)return'';
-    return '<div style="margin-bottom:20px">'
-      +'<div class="term-cat-header"><span class="term-cat-icon">'+cat.icon+'</span>'+cat.name+'</div>'
+    const catId='cat-'+i;
+    return '<div class="term-cat-wrap" id="'+catId+'">'
+      +'<div class="term-cat-header term-cat-toggle" onclick="toggleCategory(\''+catId+'\')">'
+      +'<div class="term-cat-left"><span class="term-cat-icon">'+cat.icon+'</span>'+cat.name+'</div>'
+      +'<div class="term-cat-meta"><span class="term-cat-count">'+catTerms.length+'</span><span class="term-cat-chevron">›</span></div>'
+      +'</div>'
+      +'<div class="term-cat-body">'
       +catTerms.map(termCardHtml).join('')
+      +'</div>'
       +'</div>';
   }).join('');
+}
+
+function toggleCategory(id){
+  const wrap=document.getElementById(id);
+  if(!wrap)return;
+  const wasOpen=wrap.classList.contains('open');
+  // Close all categories
+  document.querySelectorAll('.term-cat-wrap.open').forEach(w=>w.classList.remove('open'));
+  if(!wasOpen){
+    wrap.classList.add('open');
+    // Scroll category header into view
+    setTimeout(()=>{
+      const top=wrap.getBoundingClientRect().top+window.scrollY;
+      const hdrH=document.querySelector('.hdr')?.offsetHeight||56;
+      window.scrollTo({top:top-hdrH-8,behavior:'smooth'});
+    },50);
+  }
+  haptic();
 }
 
 function renderTermsSearch(q){
