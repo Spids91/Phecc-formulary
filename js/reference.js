@@ -97,7 +97,7 @@ function getPaedVitals(age){
 
 const PAED_DRUGS={
   EMT:[
-    {lbl:'Adrenaline 1:1,000 (anaphylaxis IM)',drugName:'Adrenaline 1:1,000',fn:(wt,age)=>{if(age<0.5)return`${(wt*0.01).toFixed(2)} mL IM`;if(age<6)return'0.15 mL IM (150mcg)';if(age<12)return'0.3 mL IM (300mcg)';return'0.3–0.5 mL IM';}},
+    {lbl:'Adrenaline 1:1,000 (anaphylaxis IM)',drugName:'Adrenaline 1:1,000',fn:(wt,age)=>{if(age<0.5)return`${(wt*0.01).toFixed(2)} mL IM`;if(age<6)return'0.15 mL IM (150mcg)';if(age<12)return'0.3 mL IM (300mcg)';return'0.5 mL IM (500mcg)';}},
     {lbl:'Glucose Gel (buccal)',drugName:'Glucose Gel',fn:(wt,age)=>age<=8?'5–10g buccal':'10–20g buccal'},
     {lbl:'Glucagon IM',drugName:'Glucagon',fn:(wt)=>wt<25?'500mcg IM':'1mg IM'},
     {lbl:'Ibuprofen PO (10mg/kg)',drugName:'Ibuprofen',fn:(wt)=>`${Math.min(wt*10,400).toFixed(0)} mg PO`},
@@ -108,13 +108,13 @@ const PAED_DRUGS={
     {lbl:'Salbutamol NEB',drugName:'Salbutamol',fn:(wt,age)=>age<5?'2.5mg NEB':'5mg NEB'},
   ],
   P:[
-    {lbl:'Adrenaline 1:1,000 (anaphylaxis IM)',drugName:'Adrenaline 1:1,000',fn:(wt,age)=>{if(age<0.5)return`${(wt*0.01).toFixed(2)} mL IM`;if(age<6)return'0.15 mL IM (150mcg)';if(age<12)return'0.3 mL IM (300mcg)';return'0.3–0.5 mL IM';}},
+    {lbl:'Adrenaline 1:1,000 (anaphylaxis IM)',drugName:'Adrenaline 1:1,000',fn:(wt,age)=>{if(age<0.5)return`${(wt*0.01).toFixed(2)} mL IM`;if(age<6)return'0.15 mL IM (150mcg)';if(age<12)return'0.3 mL IM (300mcg)';return'0.5 mL IM (500mcg)';}},
     {lbl:'Chlorphenamine IM',drugName:'Chlorphenamine',fn:(wt,age)=>{if(age<0.5)return`${(wt*0.25).toFixed(2)} mg IM`;if(age<6)return'2.5mg IM';if(age<12)return'5mg IM';return'10mg IM';}},
     {lbl:'Dexamethasone PO (croup)',drugName:'Dexamethasone',fn:(wt)=>`${Math.min(wt*0.3,12).toFixed(1)} mg PO`},
     {lbl:'Glucose 10% IV (5mL/kg)',drugName:'Glucose 10% Solution',fn:(wt)=>`${(wt*5).toFixed(0)} mL IV`},
     {lbl:'Hydrocortisone IM (anaphylaxis)',drugName:'Hydrocortisone',fn:(wt,age)=>{if(age<0.5)return'25mg IM';if(age<6)return'50mg IM';if(age<12)return'100mg IM';return'200mg IM';}},
     {lbl:'Midazolam buccal (seizure)',drugName:'Midazolam',fn:(wt,age)=>{if(age<0.25)return`${(wt*0.3).toFixed(2)}mg`;if(age<1)return'2.5mg buccal';if(age<5)return'5mg buccal';if(age<10)return'7.5mg buccal';return'10mg buccal';}},
-    {lbl:'Naloxone IM (10mcg/kg)',drugName:'Naloxone',fn:(wt)=>`${Math.min(wt*0.01*1000,400).toFixed(0)} mcg IM`},
+    {lbl:'Naloxone IN (20mcg/kg)',drugName:'Naloxone',fn:(wt)=>`${Math.min(wt*0.02*1000,800).toFixed(0)} mcg IN`},
     {lbl:'NaCl 0.9% (anaphylaxis 20mL/kg)',drugName:'Sodium Chloride 0.9%',fn:(wt)=>`${(wt*20).toFixed(0)} mL IV`},
     {lbl:'Ondansetron IM (100mcg/kg)',drugName:'Ondansetron',fn:(wt)=>`${Math.min(wt*0.1,4).toFixed(2)} mg IM`},
     {lbl:'Salbutamol NEB',drugName:'Salbutamol',fn:(wt,age)=>age<5?'2.5mg NEB':'5mg NEB'},
@@ -122,7 +122,7 @@ const PAED_DRUGS={
   AP:[
     {lbl:'Adrenaline 1:10,000 (cardiac arrest)',drugName:'Adrenaline 1:10,000',fn:(wt)=>`${(wt*0.1).toFixed(1)} mL IV/IO (10mcg/kg)`},
     {lbl:'Adrenaline IV/IO (sepsis 0.1mcg/kg)',drugName:'Adrenaline 1:1,000',fn:(wt)=>`${(wt*0.1).toFixed(1)} mcg IV/IO`},
-    {lbl:'Adrenaline 1:1,000 (anaphylaxis IM)',drugName:'Adrenaline 1:1,000',fn:(wt,age)=>{if(age<0.5)return`${(wt*0.01).toFixed(2)} mL IM`;if(age<6)return'0.15 mL IM (150mcg)';if(age<12)return'0.3 mL IM (300mcg)';return'0.3–0.5 mL IM';}},
+    {lbl:'Adrenaline 1:1,000 (anaphylaxis IM)',drugName:'Adrenaline 1:1,000',fn:(wt,age)=>{if(age<0.5)return`${(wt*0.01).toFixed(2)} mL IM`;if(age<6)return'0.15 mL IM (150mcg)';if(age<12)return'0.3 mL IM (300mcg)';return'0.5 mL IM (500mcg)';}},
     {lbl:'Amiodarone VF/pVT (5mg/kg)',drugName:'Amiodarone',fn:(wt)=>`${(wt*5).toFixed(0)} mg IV/IO`},
     {lbl:'Ceftriaxone IV (50mg/kg)',drugName:'Ceftriaxone',fn:(wt)=>`${Math.min(wt*50,2000).toFixed(0)} mg IV`},
     {lbl:'Fentanyl IN (1.5mcg/kg)',drugName:'Fentanyl',fn:(wt)=>`${Math.min(wt*1.5,100).toFixed(0)} mcg IN`},
@@ -131,7 +131,7 @@ const PAED_DRUGS={
     {lbl:'Lidocaine IO pain (500mcg/kg)',drugName:'Lidocaine',fn:(wt)=>`${Math.min(wt*0.5,40).toFixed(1)} mg IO`},
     {lbl:'Midazolam buccal (seizure)',drugName:'Midazolam',fn:(wt,age)=>{if(age<0.25)return`${(wt*0.3).toFixed(2)}mg`;if(age<1)return'2.5mg buccal';if(age<5)return'5mg buccal';if(age<10)return'7.5mg buccal';return'10mg buccal';}},
     {lbl:'Morphine IV (50mcg/kg, max 2mg)',drugName:'Morphine Sulphate',fn:(wt)=>`${Math.min(wt*0.05,2).toFixed(2)} mg IV`},
-    {lbl:'Naloxone IV (10mcg/kg)',drugName:'Naloxone',fn:(wt)=>`${Math.min(wt*0.01*1000,400).toFixed(0)} mcg IV/IO`},
+    {lbl:'Naloxone IN (20mcg/kg)',drugName:'Naloxone',fn:(wt)=>`${Math.min(wt*0.02*1000,800).toFixed(0)} mcg IN`},
     {lbl:'Diazepam PR (seizure)',drugName:'Diazepam Rectal',fn:(wt,age)=>{if(age<0.5)return'Contraindicated';if(age<2)return'5mg PR';if(age<12)return'5–10mg PR';return'10mg PR';}},
     {lbl:'Diazepam IV/IO (seizure 0.1mg/kg)',drugName:'Diazepam Injection',fn:(wt)=>`${(wt*0.1).toFixed(2)} mg IV/IO`},
     {lbl:'NaCl 0.9% (anaphylaxis 20mL/kg)',drugName:'Sodium Chloride 0.9%',fn:(wt)=>`${(wt*20).toFixed(0)} mL IV`},
