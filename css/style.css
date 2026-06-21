@@ -1314,10 +1314,10 @@ ul { list-style: none; }
 @keyframes eggArc {
   /* Launch — fast off the corner, decelerating as it climbs (ease-out) */
   0%   { transform: translate(0, 0) rotate(0); opacity: 1; animation-timing-function: cubic-bezier(.12,.7,.35,1); }
-  /* Most of the rise + horizontal travel done, still fully visible */
-  60%  { transform: translate(calc(var(--dx) * .85), calc(var(--dy) * .9)) rotate(calc(var(--rot) * .7)); opacity: 1; }
-  /* Reaches the apex and gently fizzles out — drifts up a touch more while fading */
-  100% { transform: translate(var(--dx), calc(var(--dy) * 1.08)) rotate(var(--rot)); opacity: 0; }
+  /* Still rising and fully visible — linear from here so there's no stall */
+  55%  { transform: translate(calc(var(--dx) * .8), calc(var(--dy) * .8)) rotate(calc(var(--rot) * .7)); opacity: 1; animation-timing-function: linear; }
+  /* Continues drifting upward at a steady pace while fading — no pause at the apex */
+  100% { transform: translate(var(--dx), calc(var(--dy) * 1.35)) rotate(var(--rot)); opacity: 0; }
 }
 
 /* ── STREAK FREEZE MODAL (calm announcement, no confetti) ─────────────────── */
