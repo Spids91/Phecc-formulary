@@ -693,6 +693,39 @@ ul { list-style: none; }
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── ACHIEVEMENT UNLOCK BANNER ──────────────────────────────────────────── */
+.ach-banner {
+  position: fixed; top: 0; left: 50%;
+  transform: translateX(-50%) translateY(-140%);
+  z-index: 750; width: calc(100% - var(--sp4) * 2); max-width: 420px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--sp2));
+  transition: transform .45s cubic-bezier(.2,1.1,.3,1);
+  pointer-events: none;
+}
+.ach-banner.show { transform: translateX(-50%) translateY(0); }
+.ach-banner-inner {
+  display: flex; align-items: center; gap: var(--sp3);
+  background: linear-gradient(135deg,#1E3A8A,#2563EB);
+  border: 1px solid rgba(252,211,77,.5);
+  border-radius: var(--r16); padding: var(--sp3) var(--sp4);
+  box-shadow: 0 8px 28px rgba(0,0,0,.28);
+  margin: var(--sp2);
+}
+.ach-banner-icon {
+  font-size: 32px; line-height: 1; flex-shrink: 0;
+  animation: achPop .6s var(--ease) both;
+}
+@keyframes achPop { 0%{transform:scale(0) rotate(-25deg);} 100%{transform:scale(1) rotate(0);} }
+.ach-banner-text { display: flex; flex-direction: column; min-width: 0; }
+.ach-banner-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #FCD34D;
+}
+.ach-banner-name {
+  font-size: var(--text-base); font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
 /* ── PROGRESS PAGE ───────────────────────────────────────────────────── */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp2); margin-bottom: var(--sp4); animation: pgIn var(--dur-normal) var(--ease) both; }
 .stats-grid .stat-card:last-child { grid-column: 1 / -1; }

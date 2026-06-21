@@ -252,8 +252,34 @@ function checkBadges(){
     showToast('❄️ Streak freeze token earned!');
   }
   if(newBadges.length){
-    newBadges.forEach(b=>setTimeout(()=>showToast(`🏅 Badge unlocked: ${b.name}`),500));
+    queueAchievements(newBadges);
   }
+}
+
+// ── ACHIEVEMENT UNLOCK BANNER ──────────────────────────────────────────────────
+// Drops down from the top. Queues multiple unlocks so each is shown in turn.
+let _achQueue=[];
+let _achShowing=false;
+function queueAchievements(badges){
+  _achQueue.push(...badges);
+  if(!_achShowing)showNextAchievement();
+}
+function showNextAchievement(){
+  if(!_achQueue.length){_achShowing=false;return;}
+  _achShowing=true;
+  const b=_achQueue.shift();
+  const banner=document.getElementById('achBanner');
+  if(!banner){_achShowing=false;return;}
+  document.getElementById('achIcon').textContent=b.icon;
+  document.getElementById('achName').textContent=b.name;
+  banner.classList.add('show');
+  haptic('success');
+  // Visible long enough to notice, then slide away and show the next
+  setTimeout(()=>{
+    banner.classList.remove('show');
+    // Wait for slide-out transition before showing the next one
+    setTimeout(showNextAchievement,450);
+  },2600);
 }
 
 // Custom confirm modal — replaces browser confirm() which is blocked in WKWebView
