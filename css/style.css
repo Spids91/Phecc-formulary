@@ -821,7 +821,7 @@ ul { list-style: none; }
 .hosp-num-val { font-size: var(--text-xs); font-weight: 600; color: var(--primary); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .hosp-num-val:active { opacity: .7; }
 .hosp-num-val.na { color: var(--text3); font-weight: 400; cursor: default; }
-.term-cat-wrap { margin-bottom: var(--sp2); border-radius: var(--r12); overflow: hidden; border: 1px solid var(--border); }
+.term-cat-wrap { margin-bottom: var(--sp2); border-radius: var(--r12); overflow: hidden; border: 1px solid var(--border); background: var(--surf); }
 .term-cat-toggle {
   display: flex; align-items: center; justify-content: space-between;
   padding: var(--sp3) var(--sp4); cursor: pointer;
@@ -836,9 +836,13 @@ ul { list-style: none; }
 .term-cat-chevron { font-size: 18px; color: var(--text3); transition: transform var(--dur-fast) var(--ease); display: inline-block; }
 .term-cat-wrap.open .term-cat-chevron { transform: rotate(90deg); }
 .term-cat-wrap.open .term-cat-toggle { border-bottom: 1px solid var(--border); }
-.term-cat-body { display: none; padding: var(--sp2); }
+.term-cat-body { display: none; padding: var(--sp2); background: var(--surf); }
 .term-cat-wrap.open .term-cat-body { display: block; }
-.term-cat-header { font-size: var(--text-sm); font-weight: 700; color: var(--text); padding: var(--sp3) 0 var(--sp2); margin-bottom: var(--sp2); display: flex; align-items: center; gap: var(--sp2); }
+/* Remove the trailing margin on the last card so the soft-white fills to the bottom edge */
+.term-cat-body > .term-card:last-child,
+.term-cat-body > .medref-card:last-child { margin-bottom: 0; }
+/* Standalone category header (search results label only) — NOT the accordion toggle */
+.term-cat-header:not(.term-cat-toggle) { font-size: var(--text-sm); font-weight: 700; color: var(--text); padding: var(--sp3) 0 var(--sp2); margin-bottom: var(--sp2); display: flex; align-items: center; gap: var(--sp2); }
 .term-search-header { border-bottom: 2px solid var(--primary); }
 .term-cat-icon { font-size: 15px; }
 /* ── MEDICATION REFERENCE ─────────────────────────────────────────────────── */
