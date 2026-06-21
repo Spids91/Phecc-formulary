@@ -176,7 +176,7 @@ function toggleRevealAll(btn){
   const reveals=card.querySelectorAll('.ql-reveal');
   const anyHidden=[...reveals].some(r=>!r.classList.contains('open'));
   reveals.forEach(r=>r.classList.toggle('open',anyHidden));
-  btn.textContent=anyHidden?'Hide all':'Reveal all';
+  btn.textContent=anyHidden?'Hide all answers':'Reveal all answers';
   haptic();
 }
 
@@ -205,7 +205,7 @@ function renderQuestionAccordion(query){
   let html='';
   filtered.forEach(d=>{
     html+='<div class="ql-card" data-drug="'+d.id+'">';
-    html+='<div class="ql-header"><div class="ql-name">'+d.name+'</div><div class="ql-header-right"><button class="ql-reveal-all" onclick="event.stopPropagation();toggleRevealAll(this)">Reveal all</button><div class="ql-chevron">›</div></div></div>';
+    html+='<div class="ql-header"><div class="ql-name">'+d.name+'</div><div class="ql-header-right"><button class="ql-reveal-all" onclick="event.stopPropagation();toggleRevealAll(this)">Reveal all answers</button><div class="ql-chevron">›</div></div></div>';
     html+='<div class="ql-body">';
     [...EASY_Q,...HARD_Q].forEach(qt=>{
       const answer=qt.a(d);
