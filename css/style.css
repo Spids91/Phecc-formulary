@@ -838,7 +838,8 @@ ul { list-style: none; }
 .term-cat-wrap.open .term-cat-toggle { border-bottom: 1px solid var(--border); }
 .term-cat-body { display: none; padding: var(--sp2); }
 .term-cat-wrap.open .term-cat-body { display: block; }
-.term-cat-header { font-size: var(--text-sm); font-weight: 700; color: var(--text); padding: var(--sp3) 0 var(--sp2); border-bottom: 2px solid var(--primary); margin-bottom: var(--sp2); display: flex; align-items: center; gap: var(--sp2); }
+.term-cat-header { font-size: var(--text-sm); font-weight: 700; color: var(--text); padding: var(--sp3) 0 var(--sp2); margin-bottom: var(--sp2); display: flex; align-items: center; gap: var(--sp2); }
+.term-search-header { border-bottom: 2px solid var(--primary); }
 .term-cat-icon { font-size: 15px; }
 /* ── MEDICATION REFERENCE ─────────────────────────────────────────────────── */
 .medref-results-lbl { font-size: 12px; font-weight: 600; color: var(--text3); margin: 0 0 var(--sp2) 2px; }

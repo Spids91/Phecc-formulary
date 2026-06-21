@@ -133,7 +133,7 @@ const PAED_DRUGS={
     {lbl:'Morphine IV (50mcg/kg, max 2mg)',drugName:'Morphine Sulphate',fn:(wt)=>`${Math.min(wt*0.05,2).toFixed(2)} mg IV`},
     {lbl:'Naloxone IN (20mcg/kg)',drugName:'Naloxone',fn:(wt)=>`${Math.min(wt*0.02*1000,800).toFixed(0)} mcg IN`},
     {lbl:'Diazepam PR (seizure)',drugName:'Diazepam Rectal',fn:(wt,age)=>{if(age<0.5)return'Contraindicated';if(age<2)return'5mg PR';if(age<12)return'5–10mg PR';return'10mg PR';}},
-    {lbl:'Diazepam IV/IO (seizure 0.1mg/kg)',drugName:'Diazepam Injection',fn:(wt)=>`${(wt*0.1).toFixed(2)} mg IV/IO`},
+    {lbl:'Diazepam IV/IO (seizure 0.1mg/kg)',drugName:'Diazepam Injection',fn:(wt)=>`${Math.min(wt*0.1,5).toFixed(2)} mg IV/IO`},
     {lbl:'NaCl 0.9% (anaphylaxis 20mL/kg)',drugName:'Sodium Chloride 0.9%',fn:(wt)=>`${(wt*20).toFixed(0)} mL IV`},
   ]
 };

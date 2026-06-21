@@ -130,7 +130,7 @@ function renderTermsSearch(q){
     .sort((a,b)=>b.score-a.score||a.t.term.localeCompare(b.t.term))
     .map(x=>x.t);
   if(!results.length)return'<div class="empty"><div class="empty-ico">🔍</div><p>No terms match your search</p></div>';
-  return '<div class="term-cat-header"><span class="term-cat-icon">📖</span>Search Results</div>'
+  return '<div class="term-cat-header term-search-header"><span class="term-cat-icon">📖</span>Search Results</div>'
     +results.map(termCardHtml).join('');
 }
 
