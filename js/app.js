@@ -772,10 +772,10 @@ function copyrightEasterEgg(){
       const dx=(40+Math.random()*55)*(fromLeft?1:-1);   // horizontal travel (vw)
       const dy=-(45+Math.random()*40);                  // peak rise (vh, negative = up)
       const rot=Math.random()*720-360;
-      // Longer, tighter-range duration so the whole arc reads as gravity, not a flick.
-      // Small variance keeps pieces feeling like one burst rather than random speeds.
-      const dur=2.8+Math.random()*0.6;
-      const delay=Math.random()*0.18;
+      // Launch-and-fizzle: shorter duration since pieces fade at the apex
+      // rather than falling all the way down. Tight variance = coherent burst.
+      const dur=1.6+Math.random()*0.5;
+      const delay=Math.random()*0.15;
       const startEdge=fromLeft?'left:-10px;':'right:-10px;';
       html+=`<span class="egg-piece" style="`
         +`${startEdge}`
