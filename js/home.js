@@ -5,6 +5,10 @@ function getDotd(){
   // Shuffles through all 46 drugs before repeating any
   // Uses the day number to pick from a deterministic shuffle sequence
   const day=Math.floor(Date.now()/86400000);
+  // Return cached result only if it's still the same day; otherwise recompute.
+  // This ensures the Drug of the Day rolls over at midnight even if the app
+  // was left open across the day boundary.
+  if(_dotdCache&&_dotdDay===day)return _dotdCache;
   const cycle=Math.floor(day/MEDS.length); // which full cycle we're in
   const pos=day%MEDS.length;              // position within current cycle
   // Seeded shuffle — Mulberry32 PRNG for uniform distribution
@@ -92,8 +96,8 @@ function renderHome(){
     }
   }
 
-  // Drug of the Day (getDotd result cached — was being called twice per render)
-  const d=_dotdCache||getDotd();
+  // Drug of the Day (getDotd handles its own daily cache invalidation)
+  const d=getDotd();
   document.getElementById('dotdName').textContent=d.name;
   document.getElementById('dotdClass').textContent=d.classification;
   document.getElementById('dotdFact').textContent=d.quizHints.keyFact;

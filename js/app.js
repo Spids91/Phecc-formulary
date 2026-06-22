@@ -31,27 +31,27 @@ function masteryTag(id){
 
 // BADGES
 const BADGES=[
-  {id:'first_quiz',     icon:'🎯', name:'First Quiz',           check:g=>g.quizzes>=1},
-  {id:'streak_7',       icon:'📅', name:'7 Day Streak',          check:g=>g.streak>=7},
-  {id:'streak_30',      icon:'🔥', name:'30 Day Streak',         check:g=>g.streak>=30},
-  {id:'mastered_10',    icon:'⭐', name:'10 Drugs Mastered',     check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=10},
-  {id:'mastered_25',    icon:'💜', name:'25 Drugs Mastered',     check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=25},
-  {id:'mastered_all',   icon:'👑', name:'All 46 Drugs Mastered', check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=46},
-  {id:'emt_mastered',   icon:'🏆', name:'All EMT Drugs Mastered',check:g=>MEDS.filter(m=>m.scope.includes('EMT')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
-  {id:'par_mastered',   icon:'🥈', name:'All Paramedic Drugs Mastered',check:g=>MEDS.filter(m=>m.scope.includes('P')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
-  {id:'ap_mastered',    icon:'🥇', name:'All AP Drugs Mastered', check:g=>MEDS.filter(m=>m.scope.includes('AP')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
-  {id:'xp_500',         icon:'⚡', name:'500 XP',                check:g=>g.xp>=500},
-  {id:'xp_1000',        icon:'🚀', name:'1000 XP',               check:g=>g.xp>=1000},
-  {id:'questions_100',  icon:'🧠', name:'100 Questions',         check:g=>g.totalQ>=100},
-  {id:'all_opened',     icon:'💊', name:'Opened Every Drug',     check:g=>MEDS.every(m=>g.seenDrugs&&g.seenDrugs.includes(m.id))},
-  {id:'freeze_used',    icon:'❄️', name:'Used Streak Freeze',    check:g=>g.freezesUsed>=1},
-  {id:'half_mastered',  icon:'🎖️', name:'Half Way — 23 Drugs Mastered', check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=23},
-  {id:'flawless',       icon:'💯', name:'Flawless — 100% Quiz',  check:g=>(g.perfectQuizzes||0)>=1},
-  {id:'daily_7',        icon:'📆', name:'Daily Devotee — 7 Daily Challenges', check:g=>(g.dailyDoneCount||0)>=7},
-  {id:'daily_30',       icon:'🗓️', name:'Daily Legend — 30 Daily Challenges',check:g=>(g.dailyDoneCount||0)>=30},
-  {id:'perfect_week',   icon:'🌟', name:'Perfect Week — 7 Day Streak',check:g=>g.streak>=7},
-  {id:'note_taker',     icon:'📝', name:'Note Taker — 10 Drug Notes', check:g=>Object.values(g.notes||{}).filter(n=>n&&n.trim().length>0).length>=10},
-  {id:'night_shift',    icon:'🌙', name:'Night Shift',            check:g=>g.nightShiftDone===true}
+  {id:'first_quiz',     icon:'🎯', name:'First Steps',      desc:'Complete your first quiz',            check:g=>g.quizzes>=1},
+  {id:'streak_7',       icon:'📅', name:'Consistent',       desc:'Reach a 7 day streak',                check:g=>g.streak>=7},
+  {id:'streak_30',      icon:'🔥', name:'Unstoppable',      desc:'Reach a 30 day streak',               check:g=>g.streak>=30},
+  {id:'mastered_10',    icon:'⭐', name:'Getting There',    desc:'Master 10 drugs',                     check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=10},
+  {id:'mastered_25',    icon:'💜', name:'Well Versed',      desc:'Master 25 drugs',                     check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=25},
+  {id:'mastered_all',   icon:'👑', name:'Formulary Master', desc:'Master all 46 drugs',                 check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=46},
+  {id:'emt_mastered',   icon:'🏆', name:'EMT Complete',     desc:'Master all EMT drugs',                check:g=>MEDS.filter(m=>m.scope.includes('EMT')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
+  {id:'par_mastered',   icon:'🥈', name:'Paramedic Complete',desc:'Master all Paramedic drugs',         check:g=>MEDS.filter(m=>m.scope.includes('P')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
+  {id:'ap_mastered',    icon:'🥇', name:'AP Complete',      desc:'Master all AP drugs',                 check:g=>MEDS.filter(m=>m.scope.includes('AP')).every(m=>(g.drugCorrect[m.id]||0)>=10)},
+  {id:'xp_500',         icon:'⚡', name:'Rising Star',      desc:'Earn 500 XP',                         check:g=>g.xp>=500},
+  {id:'xp_1000',        icon:'🚀', name:'High Flyer',       desc:'Earn 1000 XP',                        check:g=>g.xp>=1000},
+  {id:'questions_100',  icon:'🧠', name:'Quiz Brain',       desc:'Answer 100 questions',                check:g=>g.totalQ>=100},
+  {id:'all_opened',     icon:'💊', name:'Curious',          desc:'Open every drug page',                check:g=>MEDS.every(m=>g.seenDrugs&&g.seenDrugs.includes(m.id))},
+  {id:'freeze_used',    icon:'❄️', name:'Saved',            desc:'Use a streak freeze',                 check:g=>g.freezesUsed>=1},
+  {id:'half_mastered',  icon:'🎖️', name:'Half Way',         desc:'Master 23 drugs',                     check:g=>Object.values(g.drugCorrect).filter(v=>v>=10).length>=23},
+  {id:'flawless',       icon:'💯', name:'Flawless',         desc:'Score 100% on a quiz',                check:g=>(g.perfectQuizzes||0)>=1},
+  {id:'daily_7',        icon:'📆', name:'Daily Devotee',    desc:'Complete 7 daily challenges',         check:g=>(g.dailyDoneCount||0)>=7},
+  {id:'daily_30',       icon:'🗓️', name:'Daily Legend',     desc:'Complete 30 daily challenges',        check:g=>(g.dailyDoneCount||0)>=30},
+  {id:'perfect_week',   icon:'🌟', name:'Perfect Week',     desc:'Reach a 7 day streak',                check:g=>g.streak>=7},
+  {id:'note_taker',     icon:'📝', name:'Note Taker',       desc:'Add notes to 10 drugs',               check:g=>Object.values(g.notes||{}).filter(n=>n&&n.trim().length>0).length>=10},
+  {id:'night_shift',    icon:'🌙', name:'Night Shift',      desc:'Do a quiz between midnight and 6am',  check:g=>g.nightShiftDone===true}
 ];
 
 // STATE
@@ -272,6 +272,8 @@ function showNextAchievement(){
   if(!banner){_achShowing=false;return;}
   document.getElementById('achIcon').textContent=b.icon;
   document.getElementById('achName').textContent=b.name;
+  const descEl=document.getElementById('achDesc');
+  if(descEl)descEl.textContent=b.desc||'';
   banner.classList.add('show');
   haptic('success');
   // Visible long enough to notice, then slide away and show the next
@@ -466,7 +468,33 @@ function checkDisclaimer(){
 }
 
 // NAV
+// Clear every search field + results across all tabs — called on tab switch so
+// no stale search text or results persist when navigating away.
+function clearAllSearches(){
+  // Home global search
+  if(typeof clearHomeSearch==='function'){
+    const hi=document.getElementById('homeSearchInput');
+    if(hi&&hi.value)clearHomeSearch();
+  }
+  // Reference drug search
+  if(typeof clearSearch==='function'){
+    const si=document.getElementById('searchInput');
+    if(si&&si.value)clearSearch();
+  }
+  // Study / medical terms search
+  if(typeof clearStudySearch==='function'){
+    const li=document.getElementById('learnSearch');
+    if(li&&li.value)clearStudySearch();
+  }
+  // Medication reference search
+  if(typeof clearMedrefSearch==='function'){
+    const mi=document.getElementById('medrefSearch');
+    if(mi&&mi.value)clearMedrefSearch();
+  }
+}
+
 function showPage(id,btn){
+  clearAllSearches();
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -515,13 +543,22 @@ function updateStats(){
 function renderBadges(){
   const el=document.getElementById('badgesGrid');
   if(!el)return;
-  el.innerHTML=BADGES.map(b=>{
+  el.innerHTML=BADGES.map((b,i)=>{
     const earned=G.earnedBadges.includes(b.id);
-    return`<div class="badge-item ${earned?'earned':''}">
+    return`<div class="badge-item ${earned?'earned':''}" onclick="showBadgeInfo(${i})">
       <div class="badge-icon ${earned?'earned':''}">${b.icon}</div>
       <div class="badge-name">${b.name}</div>
     </div>`;
   }).join('');
+}
+
+// Tap a badge to see its name + how to earn it (descriptions don't fit in the grid)
+function showBadgeInfo(i){
+  const b=BADGES[i];
+  if(!b)return;
+  const earned=G.earnedBadges.includes(b.id);
+  showToast(`${b.icon} ${b.name} — ${b.desc}${earned?' ✓':''}`);
+  haptic();
 }
 
 function renderDonut(){
