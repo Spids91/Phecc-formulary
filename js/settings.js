@@ -62,7 +62,7 @@ const LEGAL = {
       <h2>Overview</h2>
       <p>Aireva Medic is committed to protecting your privacy. This policy explains what data is stored, how it is stored, and your rights regarding that data.</p>
       <h2>Data Storage</h2>
-      <p>All user data is stored <strong>locally on your device</strong> using browser localStorage. No data is transmitted to any server, third party, or external service of any kind.</p>
+      <p>All app data is stored <strong>locally on your device</strong>. Your study progress and personal notes are never transmitted to any server, third party, or external service.</p>
       <h2>What is Stored</h2>
       <p>The following data is stored locally on your device only:</p>
       <p>• Quiz progress, XP and streak counts<br>• Drug mastery levels and question history<br>• Personal notes added to drug pages<br>• App preferences (dark mode, etc.)<br>• Daily activity log for the progress chart</p>
