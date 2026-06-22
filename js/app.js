@@ -1,4 +1,4 @@
-// ─── APP.JS — Tús Medic ───────────────────────────────────────────────────────
+// ─── APP.JS — Aireva Medic ───────────────────────────────────────────────────────
 
 const LEVELS=[
   {name:"Rookie",          xp:0,     next:250,      color:"#475569",gradient:"linear-gradient(135deg,#0F172A,#334155)"},

@@ -32,17 +32,17 @@ const LEGAL = {
     title: 'Terms of Service',
     body: `
       <h2>1. Acceptance of Terms</h2>
-      <p>By accessing or using Tús Medic ("the app"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the app. Your continued use of the app constitutes acceptance of these terms.</p>
+      <p>By accessing or using Aireva Medic ("the app"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the app. Your continued use of the app constitutes acceptance of these terms.</p>
       <h2>2. Description of Service</h2>
-      <p>Tús Medic is a free educational application designed to support the study and revision of prehospital pharmacology for PHECC-registered practitioners and students. The app provides drug reference information, quiz modes, medical terminology, hospital contact details and a paediatric drug calculator.</p>
+      <p>Aireva Medic is a free educational application designed to support the study and revision of prehospital pharmacology for PHECC-registered practitioners and students. The app provides drug reference information, quiz modes, medical terminology, hospital contact details and a paediatric drug calculator.</p>
       <h2>3. Medical Disclaimer</h2>
-      <p>Tús Medic is a <strong>learning tool only</strong>. It is not a clinical decision support tool and must not be used to guide patient care decisions.</p>
+      <p>Aireva Medic is a <strong>learning tool only</strong>. It is not a clinical decision support tool and must not be used to guide patient care decisions.</p>
       <p>Drug information contained in this app is based on the PHECC 2026 Clinical Practice Guidelines and has not been independently verified by PHECC or any regulatory body. Always refer to current official PHECC guidelines and your service's approved formulary when treating patients.</p>
       <p>The developer accepts no responsibility for any clinical decisions made on the basis of information contained in this app.</p>
       <h2>4. Limitation of Liability</h2>
       <p>The app is provided "as is" without warranty of any kind, express or implied. The developer does not warrant that the information contained in the app is accurate, complete or current. To the maximum extent permitted by law, the developer shall not be liable for any direct, indirect, incidental or consequential damages arising from your use of or reliance on the app.</p>
       <h2>5. Third Party Content</h2>
-      <p>Drug information in this app is based on publicly available PHECC 2026 Clinical Practice Guidelines. Tús Medic is an independent educational tool and is not affiliated with, endorsed by, or approved by PHECC or any other regulatory body.</p>
+      <p>Drug information in this app is based on publicly available PHECC 2026 Clinical Practice Guidelines. Aireva Medic is an independent educational tool and is not affiliated with, endorsed by, or approved by PHECC or any other regulatory body.</p>
       <h2>6. Age Requirement</h2>
       <p>This app is intended for users aged 16 and over. By using the app you confirm that you meet this age requirement.</p>
       <h2>7. Intellectual Property</h2>
@@ -60,7 +60,7 @@ const LEGAL = {
     title: 'Privacy Policy',
     body: `
       <h2>Overview</h2>
-      <p>Tús Medic is committed to protecting your privacy. This policy explains what data is stored, how it is stored, and your rights regarding that data.</p>
+      <p>Aireva Medic is committed to protecting your privacy. This policy explains what data is stored, how it is stored, and your rights regarding that data.</p>
       <h2>Data Storage</h2>
       <p>All user data is stored <strong>locally on your device</strong> using browser localStorage. No data is transmitted to any server, third party, or external service of any kind.</p>
       <h2>What is Stored</h2>
@@ -75,19 +75,19 @@ const LEGAL = {
       <h2>GDPR</h2>
       <p>As all data is stored locally on your device and no personal data is collected or processed by the developer, the General Data Protection Regulation (GDPR) data processing obligations do not apply to this app in its current form.</p>
       <h2>Contact</h2>
-      <p>For privacy queries, contact the developer at the email address listed in the app.</p>
+      <p>For privacy queries, contact us at support@airevalearning.com.</p>
       <p class="legal-meta">Last updated: June 2026 · © Keith O'Reilly 2026</p>`
   },
   disclaimer: {
     title: 'Medical Disclaimer',
     body: `
       <h2>Important Notice</h2>
-      <p><strong>Tús Medic is a learning tool only.</strong></p>
+      <p><strong>Aireva Medic is a learning tool only.</strong></p>
       <p>This app is designed to support study and revision of prehospital pharmacology for PHECC-registered practitioners and students. It is not a clinical reference tool and must not be used to guide patient care decisions.</p>
       <p>Drug information presented here is based on the PHECC 2026 Clinical Practice Guidelines and has not been independently verified by PHECC or any regulatory body.</p>
       <p><strong>Always refer to current official PHECC guidelines and your service's approved formulary when treating patients.</strong></p>
       <p>The developer accepts no responsibility for clinical decisions made on the basis of information contained in this app.</p>
-      <p>Tús Medic is an independent educational tool and is not affiliated with, endorsed by, or approved by PHECC.</p>
+      <p>Aireva Medic is an independent educational tool and is not affiliated with, endorsed by, or approved by PHECC.</p>
       <p class="legal-meta">© Keith O'Reilly 2026</p>`
   },
   patches: {
@@ -106,7 +106,7 @@ const LEGAL = {
       <h2>v0.6.0</h2>
       <p>Badges, streak freeze tokens, activity bar chart, study time, warmer light mode.</p>
       <h2>v0.5.0</h2>
-      <p>Home dashboard, disclaimer modal, adaptive quiz, medical terms categories, Tús Medic rebrand.</p>
+      <p>Home dashboard, disclaimer modal, adaptive quiz, medical terms categories, Aireva Medic rebrand.</p>
       <h2>v0.4.0</h2>
       <p>Codebase refactor into separate files.</p>
       <h2>v0.3.0</h2>
