@@ -14,6 +14,7 @@ function openDet(id) {
   if (!d) return;
   if (!G.seenDrugs.includes(id)) G.seenDrugs.push(id);
   document.getElementById('detName').textContent  = d.name;
+  document.getElementById('detBarName').textContent = d.name;  // condensed name in pinned bar
   document.getElementById('detClass').textContent = d.classification;
   const smap = { EMT:'EMT', P:'Paramedic', AP:'Adv. Paramedic' };
   const m       = getDM(id);
@@ -26,8 +27,21 @@ function openDet(id) {
   const overlay = document.getElementById('detOverlay');
   overlay.classList.add('open');
   overlay.scrollTop = 0;
+  document.getElementById('detBar')?.classList.remove('condensed');
   document.body.style.overflow = 'hidden';
   haptic();
+}
+
+// Toggle the condensed pinned-bar name once the full hero has scrolled out of view.
+// Attached once; reads the hero height each scroll so it adapts to any drug.
+function onDetScroll() {
+  const overlay = document.getElementById('detOverlay');
+  const hero = document.getElementById('detHero');
+  const bar = document.getElementById('detBar');
+  if (!overlay || !hero || !bar) return;
+  // Condense once scrolled past most of the hero
+  const threshold = hero.offsetTop + hero.offsetHeight - 12;
+  bar.classList.toggle('condensed', overlay.scrollTop > threshold);
 }
 
 function closeDet() {
@@ -44,7 +58,14 @@ function buildDet(d) {
   const correct = G.drugCorrect[d.id] || 0;
   const pct     = Math.min(correct / 10 * 100, 100);
   const m       = getDM(d.id);
-  const noteVal = (G.notes[d.id] || '').replace(/"/g, '&quot;');
+  // Escape for safe embedding inside the textarea (prevents tag breakout).
+  // Notes are local-only, but correct escaping avoids the field breaking on
+  // characters like < > & " that a user might legitimately type.
+  const noteVal = (G.notes[d.id] || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 
   // Render a dose value. Strings are parsed line-by-line: any line in the form
   // "Label: dose detail" becomes a labelled severity/scenario card; plain lines

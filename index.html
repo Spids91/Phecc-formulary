@@ -461,8 +461,13 @@
 <!-- DETAIL OVERLAY -->
 <div class="overlay" id="detOverlay">
   <div class="det-status-spacer"></div>
-  <div class="det-hdr">
+  <!-- Slim bar: always pinned. Back button + condensed name (name fades in on scroll) -->
+  <div class="det-bar" id="detBar">
     <div class="det-back" onclick="closeDet()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back</div>
+    <div class="det-bar-name" id="detBarName">—</div>
+  </div>
+  <!-- Full hero: large name, classification, scope badges. Scrolls away normally. -->
+  <div class="det-hero" id="detHero">
     <div class="det-name" id="detName">—</div>
     <div class="det-class" id="detClass">—</div>
     <div class="det-badges" id="detBadges"></div>
@@ -571,6 +576,12 @@ renderQuizTab();
   if(contentEl)contentEl.innerHTML=renderPaed();
 })();
 updateDarkToggle();
+
+// Pinned-bar condense effect on the drug detail overlay
+(function(){
+  const overlay=document.getElementById('detOverlay');
+  if(overlay)overlay.addEventListener('scroll',onDetScroll,{passive:true});
+})();
 </script>
 </body>
 </html>

@@ -558,16 +558,18 @@ function checkBurst() {
       const remaining = fcXpRemaining();
       bonus = Math.min(bonus, remaining);
     }
+    // The burst popup is an XP-reward celebration. If the cap has left no XP to
+    // award (bonus === 0), don't show it — celebrating a reward that wasn't
+    // actually given is misleading.
+    if (bonus <= 0) return;
     const el = document.getElementById('streakBurst');
-    if (el) { el.textContent = bonus > 0 ? `🔥 ${QZ.streak} in a row! +${bonus} XP` : `🔥 ${QZ.streak} in a row!`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
-    if (bonus > 0) {
-      // Accumulate into xpThis only — G.xp is awarded once at the results screen.
-      // (Previously this also added to G.xp directly, double-counting the bonus.)
-      QZ.xpThis += bonus;
-      if (QZ.fmt === 'fc') G.fcXpToday = (G.fcXpToday || 0) + bonus;
-      // Live header preview: show running total without permanently committing it
-      updateHdrPreview(G.xp + QZ.xpThis);
-    }
+    if (el) { el.textContent = `🔥 ${QZ.streak} in a row! +${bonus} XP`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
+    // Accumulate into xpThis only — G.xp is awarded once at the results screen.
+    // (Previously this also added to G.xp directly, double-counting the bonus.)
+    QZ.xpThis += bonus;
+    if (QZ.fmt === 'fc') G.fcXpToday = (G.fcXpToday || 0) + bonus;
+    // Live header preview: show running total without permanently committing it
+    updateHdrPreview(G.xp + QZ.xpThis);
   }
 }
 

@@ -438,12 +438,28 @@ ul { list-style: none; }
   transition: background var(--dur-normal) var(--ease);
 }
 .overlay.open { display: block; animation: slideRight var(--dur-normal) var(--ease) both; }
-.det-hdr { position: sticky; top: 0; z-index: 10; background: var(--hdr-bg); padding: var(--sp3) var(--sp4) var(--sp4); }
-[data-theme="dark"] .det-hdr { background: #0A1221; }
+/* Slim bar — always pinned below the status spacer. Holds the back button and a
+   condensed drug name that fades in once the big hero has scrolled away. */
+.det-bar {
+  position: sticky; top: var(--sbh, env(safe-area-inset-top, 0px)); z-index: 10;
+  background: var(--hdr-bg); padding: var(--sp2) var(--sp4);
+  display: flex; align-items: center; gap: var(--sp3); min-height: 44px;
+}
+[data-theme="dark"] .det-bar { background: #0A1221; }
+.det-bar-name {
+  font-size: var(--text-base); font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.det-bar.condensed .det-bar-name { opacity: 1; transform: translateY(0); }
+/* Full hero — scrolls away normally beneath the pinned bar */
+.det-hero { background: var(--hdr-bg); padding: 0 var(--sp4) var(--sp4); }
+[data-theme="dark"] .det-hero { background: #0A1221; }
 .det-back {
   display: flex; align-items: center; gap: var(--sp2);
   color: #93C5FD; font-size: var(--text-sm); font-weight: 600;
-  margin-bottom: var(--sp2); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; flex-shrink: 0;
 }
 .quiz-back-sticky {
   position: sticky; top: 0; z-index: 50;
