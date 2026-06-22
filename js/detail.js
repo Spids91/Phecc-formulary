@@ -46,14 +46,54 @@ function buildDet(d) {
   const m       = getDM(d.id);
   const noteVal = (G.notes[d.id] || '').replace(/"/g, '&quot;');
 
+  // Render a dose value. Strings are parsed line-by-line: any line in the form
+  // "Label: dose detail" becomes a labelled severity/scenario card; plain lines
+  // (no leading label) render as simple dose text. Works for every drug — drugs
+  // with severity tiers get cards, single-dose drugs stay clean. Objects keep
+  // their existing key→value card behaviour.
   function dh(dose) {
     if (!dose) return '<div style="color:var(--text3);font-size:14px">Not indicated.</div>';
-    if (typeof dose === 'string') return `<div class="dose-text">${dose.replace(/\n/g, '<br>')}</div>`;
+    if (typeof dose === 'string') return renderDoseString(dose);
     return Object.entries(dose).map(([k, v]) => `
       <div style="margin-bottom:8px">
         <div style="font-size:11px;font-weight:600;color:var(--success);margin-bottom:3px">${k}</div>
         <div class="dose-text">${v.replace(/\n/g, '<br>')}</div>
       </div>`).join('');
+  }
+
+  function renderDoseString(str) {
+    const lines = str.split('\n').map(l => l.trim()).filter(Boolean);
+    // A "label" is a short leading phrase before the first colon that names a
+    // severity, scenario or indication (not a time like "after 4–6hrs").
+    // We treat a line as labelled only if the colon comes early and the label
+    // contains no digits (so "1g PO" or "Recheck BGL..." stay plain).
+    const parsed = lines.map(line => {
+      const ci = line.indexOf(':');
+      if (ci > 0 && ci <= 28) {
+        const label = line.slice(0, ci).trim();
+        const body = line.slice(ci + 1).trim();
+        const looksLikeLabel = !/\d/.test(label) && body.length > 0 && label.split(' ').length <= 4;
+        if (looksLikeLabel) return { label, body };
+      }
+      return { label: null, body: line };
+    });
+    const hasAnyLabel = parsed.some(p => p.label);
+    if (!hasAnyLabel) {
+      // No severity structure — render as clean lines
+      return `<div class="dose-text">${lines.join('<br>')}</div>`;
+    }
+    // At least one labelled tier — render each as a card
+    return '<div class="dose-tiers">' + parsed.map(p => {
+      if (p.label) {
+        return `<div class="dose-tier">
+          <div class="dose-tier-lbl">${p.label}</div>
+          <div class="dose-tier-body">${p.body}</div>
+        </div>`;
+      }
+      return `<div class="dose-tier dose-tier-plain">
+        <div class="dose-tier-body">${p.body}</div>
+      </div>`;
+    }).join('') + '</div>';
   }
 
   const mLabel = m === 'unseen' ? 'Questions (0/10)' : `${MASTERY_LABELS[m]} (${Math.min(correct,10)}/10)`;
