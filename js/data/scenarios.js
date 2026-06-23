@@ -76,42 +76,47 @@ const DEV_PCT_BANDS = [
 
 // ── SHARED LOCATION BANK ─────────────────────────────────────────────────────────
 // Any presentation draws from this pool, so the setting never correlates with the
-// diagnosis (if "café" only ever meant anaphylaxis, students would guess from the
-// location alone). Deliberately Irish-flavoured for immersion, and deliberately
-// DEMOGRAPHICALLY NEUTRAL — no nursing homes / schools / playgrounds, because a
-// location that implies an age would steer the student's reasoning down a false
-// path before they've assessed the patient. Each entry slots into "{location}".
+// diagnosis. Irish-flavoured, demographically NEUTRAL (no nursing homes / schools /
+// playgrounds — a location implying an age would mislead the student's reasoning).
+//
+// `found` flag = can a patient plausibly be FOUND (come across) here?
+//   true  → places you'd come across someone (home, street, public space).
+//   false → places a patient actively TRAVELLED to and is already present at (GP
+//           surgery, pharmacy, salon, café). You're never "found" in a GP office —
+//           you made your way there. For these, an unconscious patient is described
+//           as having COLLAPSED / become unresponsive there, never "found".
+// (When unsure, set found:false — "collapsed there" reads correctly anywhere.)
 const SCEN_LOCATIONS = [
-  'a private residence',
-  'a terraced house',
-  'an apartment',
-  'a busy café',
-  'a restaurant',
-  'a shopping centre',
-  'a Centra car park',
-  'a supermarket',
-  'a pub',
-  'a hotel lobby',
-  'a GP surgery waiting room',
-  'a pharmacy',
-  'an office',
-  'a building site',
-  'a factory floor',
-  'a bus stop',
-  'a Luas stop',
-  'a train station',
-  'a petrol station',
-  'a hair salon',
-  'a gym',
-  'a leisure centre',
-  'a GAA clubhouse',
-  'a sports ground',
-  'a public park',
-  'a town square',
-  'a rural farmhouse',
-  'a country road layby',
-  'a beach car park',
-  'a community hall',
+  { name:'a private residence',        found:true  },
+  { name:'a terraced house',           found:true  },
+  { name:'an apartment',               found:true  },
+  { name:'a shopping centre',          found:true  },
+  { name:'a Centra car park',          found:true  },
+  { name:'a supermarket',              found:true  },
+  { name:'a bus stop',                 found:true  },
+  { name:'a Luas stop',                found:true  },
+  { name:'a train station',            found:true  },
+  { name:'a petrol station',           found:true  },
+  { name:'a public park',              found:true  },
+  { name:'a town square',              found:true  },
+  { name:'a rural farmhouse',          found:true  },
+  { name:'a country road layby',       found:true  },
+  { name:'a beach car park',           found:true  },
+  { name:'a building site',            found:true  },
+  { name:'a factory floor',            found:true  },
+  { name:'a busy café',                found:false },
+  { name:'a restaurant',               found:false },
+  { name:'a pub',                      found:false },
+  { name:'a hotel lobby',              found:false },
+  { name:'a GP surgery waiting room',  found:false },
+  { name:'a pharmacy',                 found:false },
+  { name:'an office',                  found:false },
+  { name:'a hair salon',               found:false },
+  { name:'a gym',                      found:false },
+  { name:'a leisure centre',           found:false },
+  { name:'a GAA clubhouse',            found:false },
+  { name:'a sports ground',            found:false },
+  { name:'a community hall',           found:false },
 ];
 
 // ── PRESENTATION TEMPLATES ───────────────────────────────────────────────────────
@@ -142,27 +147,28 @@ const PRESENTATIONS = [
     name: 'Anaphylaxis',
     demographics: { minAge: 1, maxAge: 90, sex: 'any' },
     variants: [
-      { cause:'bee sting',
+      { cause:'bee sting', conscious:true,
         dispatch:'You are called to {location} for a PATIENT with difficulty breathing.',
         presentation:'Visible facial and lip swelling, widespread urticarial (hive-like) rash, audible wheeze, looks anxious and flushed.',
         allergies:'Known allergy to bee/wasp stings.',
         events:'Was stung by a bee roughly 10 minutes ago; symptoms came on rapidly afterwards.' },
-      { cause:'peanuts',
+      { cause:'peanuts', conscious:true,
         dispatch:'You are called to {location} for a PATIENT who has become acutely unwell.',
         presentation:'Swollen lips and tongue, blotchy raised rash on neck and chest, noisy breathing, clutching at throat.',
         allergies:'Known nut allergy.',
         events:'Ate a dessert that unknowingly contained peanuts about 15 minutes ago.' },
-      { cause:'shellfish',
+      { cause:'shellfish', conscious:true,
         dispatch:'You are called to {location} for a PATIENT with sudden difficulty breathing.',
         presentation:'Facial swelling, urticaria over the arms and torso, wheeze, appears distressed and sweaty.',
         allergies:'Known shellfish allergy.',
         events:'Had just eaten a seafood dish shortly before the symptoms started.' },
-      { cause:'penicillin',
+      { cause:'penicillin', conscious:true,
         dispatch:'You are called to {location} for a PATIENT who is acutely short of breath.',
         presentation:'Lip and periorbital swelling, spreading hives, wheeze, anxious and flushed.',
         allergies:'No previously documented drug allergy.',
         events:'Took a first dose of a newly prescribed antibiotic about 20 minutes ago.' },
     ],
+    painBased: false,   // anaphylaxis is not a pain complaint → OPQRST shows honest negatives
     // ⚠️ PLACEHOLDER deviations — Keith to verify direction + intensity.
     deviations: {
       hr:    { dir:'up',   intensity:0.7 },   // tachycardia
@@ -174,17 +180,18 @@ const PRESENTATIONS = [
     },
     sample: {
       symptoms:'Difficulty breathing, throat tightness, itching, feeling of impending doom.',
-      medications:'Nil regular (or as per cause).',
+      medications:'Nil regular.',
       pmh:'Previous milder allergic reactions.',
       lastIntake:'As per the triggering event.',
     },
+    // Non-pain presentation: OPQRST still asked, but answered honestly/negative.
     opqrst: {
-      onset:'Sudden, minutes after exposure.',
-      provocation:'Nothing relieves it; worsening.',
-      quality:'Tight chest, "can\'t get air in".',
-      radiates:'N/A.',
-      severity:'Severe and escalating.',
-      time:'Began ~10–20 minutes ago.',
+      onset:'Sudden, over a few minutes.',
+      provocation:'No.',
+      quality:'No pain — throat and chest tightness.',
+      radiates:'No.',
+      severity:'0',
+      time:'Began roughly 10–20 minutes ago.',
     },
     reveal: {
       diagnosis:'Anaphylaxis (severe systemic allergic reaction).',
@@ -205,32 +212,32 @@ const PRESENTATIONS = [
     name: 'Hypoglycaemia',
     demographics: { minAge: 1, maxAge: 90, sex: 'any' },
     variants: [
-      // NOTE: conscious level is the key decision fork here (gel vs glucagon). It's
-      // currently expressed in the presentation text only. See the AVPU/GCS TODO at
-      // the top of this file — that should eventually become a structured vital.
+      // Conscious level is the key decision fork here (gel vs glucagon). The engine
+      // adds "found unresponsive" vs "collapsed there" framing based on the location.
       // CONSCIOUS / able to swallow → leads toward buccal glucose.
-      { cause:'missed meal — conscious',
+      { cause:'missed meal — conscious', conscious:true,
         dispatch:'You are called to {location} for a PATIENT who is confused and not themselves.',
         presentation:'Alert but confused and sweaty, pale and clammy, slurred speech — but able to talk, follow simple instructions and hold a cup. Airway is their own and they can swallow.',
         allergies:'No known drug allergies.',
         events:'Took their usual insulin this morning but skipped breakfast; became increasingly confused over the last half hour.' },
-      { cause:'odd behaviour — conscious',
+      { cause:'odd behaviour — conscious', conscious:true,
         dispatch:'You are called to {location} for a PATIENT who is behaving strangely.',
         presentation:'Confused and agitated but awake and responsive, sweating heavily, unsteady, almost intoxicated in manner though no alcohol involved. Able to protect their own airway and swallow.',
         allergies:'No known drug allergies.',
-        events:'Has been increasingly muddled and clumsy over the past 20 minutes; family say this happens if they go too long without eating.' },
+        events:'Has been increasingly muddled and clumsy over the past 20 minutes; this reportedly happens if they go too long without eating.' },
       // UNCONSCIOUS / unable to swallow → leads toward IM glucagon.
-      { cause:'collapse — unresponsive',
+      { cause:'collapse — unresponsive', conscious:false,
         dispatch:'You are called to {location} for a PATIENT who has collapsed.',
-        presentation:'Found slumped and unresponsive to voice, only groaning to a painful stimulus, profuse sweating, cool clammy skin. NOT able to swallow or protect their own airway.',
+        presentation:'Slumped and unresponsive to voice, only groaning to a painful stimulus, profuse sweating, cool clammy skin. NOT able to swallow or protect their own airway.',
         allergies:'No known drug allergies.',
-        events:'Was reportedly fine earlier, then became vacant and slumped over; a bystander could not wake them.' },
-      { cause:'found unresponsive',
+        events:'Was reportedly well earlier, then became vacant and slumped over a short time ago.' },
+      { cause:'unresponsive', conscious:false,
         dispatch:'You are called to {location} for a PATIENT who is unconscious.',
         presentation:'Unrousable to voice, withdraws to pain only, sweaty and pale, breathing on their own. Cannot swallow safely — no gag/airway protection.',
         allergies:'No known drug allergies.',
-        events:'Known diabetic on insulin; found unresponsive by a family member who says they had not eaten since the morning.' },
+        events:'Known diabetic on insulin; became unresponsive a short time ago.' },
     ],
+    painBased: false,   // hypoglycaemia is not a pain complaint → OPQRST shows honest negatives
     // ⚠️ PLACEHOLDER deviations — Keith to verify.
     // The DEFINING abnormal vital is BGL (driven LOW, absolute range). HR mildly
     // raised (adrenergic response); other vitals largely normal — the teaching
@@ -247,12 +254,12 @@ const PRESENTATIONS = [
       lastIntake:'Missed or inadequate food intake relative to insulin/medication.',
     },
     opqrst: {
-      onset:'Gradual over minutes to tens of minutes.',
-      provocation:'Worsens without sugar; improves with glucose.',
-      quality:'Confusion, weakness, "not with it".',
-      radiates:'N/A.',
-      severity:'Moderate to severe; may progress to unresponsiveness.',
-      time:'Symptoms over roughly the last 20–30 minutes.',
+      onset:'Came on gradually over the last while.',
+      provocation:'No.',
+      quality:'No pain — confused and weak.',
+      radiates:'No.',
+      severity:'0',
+      time:'Over roughly the last 20–30 minutes.',
     },
     reveal: {
       diagnosis:'Hypoglycaemia (low blood glucose), commonly in insulin-treated diabetes.',
@@ -283,27 +290,28 @@ const PRESENTATIONS = [
       'Atrial fibrillation with a controlled ventricular rate.',
     ],
     variants: [
-      { cause:'exertional onset',
+      { cause:'exertional onset', conscious:true,
         dispatch:'You are called to {location} for a PATIENT complaining of chest pain.',
         presentation:'Clutching their chest, pale and sweaty (diaphoretic), looks anxious and uncomfortable, mild shortness of breath.',
         allergies:'No known drug allergies.',
         events:'Pain started about 40 minutes ago while climbing stairs and has not settled.' },
-      { cause:'at rest onset',
+      { cause:'at rest onset', conscious:true,
         dispatch:'You are called to {location} for a PATIENT with central chest pain.',
         presentation:'Grey and clammy, holding the centre of their chest, nauseated, breathing a little fast.',
         allergies:'No known drug allergies.',
         events:'Was sitting watching television when the pain came on suddenly about half an hour ago.' },
-      { cause:'collapse with pain',
-        dispatch:'You are called to {location} for a PATIENT who felt unwell with chest discomfort.',
+      { cause:'building pressure', conscious:true,
+        dispatch:'You are called to {location} for a PATIENT who feels unwell with chest discomfort.',
         presentation:'Sitting forward, sweaty and pale, one hand on the chest, looks frightened, mild breathlessness.',
         allergies:'No known drug allergies.',
         events:'Felt heavy chest pressure that built up over the last 20–30 minutes and is ongoing.' },
-      { cause:'atypical presentation',
+      { cause:'atypical presentation', conscious:true,
         dispatch:'You are called to {location} for a PATIENT who feels generally unwell and short of breath.',
         presentation:'Pale and sweaty, vague discomfort across the chest and into the jaw, a little breathless, uneasy.',
         allergies:'No known drug allergies.',
         events:'Has felt off and clammy for about an hour with discomfort that is hard to pin down.' },
     ],
+    painBased: true,    // ACS is a pain complaint → full meaningful OPQRST
     // ⚠️ PLACEHOLDER deviations — Keith to verify.
     // ACS has NO single rigid vital fingerprint — the history + ECG carry the diagnosis,
     // not dramatically abnormal vitals. So shifts here are deliberately MILD: a student
@@ -317,15 +325,18 @@ const PRESENTATIONS = [
       symptoms:'Central chest pain/pressure, sweating, nausea, shortness of breath, anxiety.',
       medications:'May be on antihypertensives, statins, or none.',
       pmh:'Possible hypertension, high cholesterol, smoking, diabetes, or previous cardiac history.',
-      lastIntake:'Variable — not directly relevant to onset.',
+      lastIntake:'A normal meal earlier in the day.',
     },
+    // Pain-based: full OPQRST with the classic cardiac descriptors (heavy/crushing/tight,
+    // radiating to arm/jaw). Quality deliberately uses cardiac language, NOT sharp/stabbing
+    // (which clinically argues AGAINST ACS).
     opqrst: {
-      onset:'Came on over minutes; note whether at rest or on exertion.',
-      provocation:'Brought on / worsened by exertion or emotional stress.',
-      quality:'Heavy, crushing, tight or pressure-like ("like a band" or "weight on the chest").',
-      radiates:'Often to the left arm, both arms, neck, jaw or back.',
-      severity:'Commonly reported around 6–9 out of 10.',
-      time:'Ongoing for roughly the last 20–40 minutes.',
+      onset:'Came on over a few minutes.',
+      provocation:'Worse on exertion; not affected by breathing or movement.',
+      quality:'Heavy, tight, pressure-like — "a weight on the chest".',
+      radiates:'Into the left arm and up to the jaw.',
+      severity:'7',
+      time:'Ongoing for the last 20–40 minutes.',
     },
     reveal: {
       diagnosis:'Acute Coronary Syndrome (suspected) — possible STEMI/NSTEMI/unstable angina depending on ECG.',

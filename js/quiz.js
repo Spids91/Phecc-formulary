@@ -285,6 +285,15 @@ function renderQuizTab() {
   // All click handlers added via addEventListener after innerHTML set
   let html = '';
 
+  // ── OSCE SCENARIO HERO (top of tab — the flagship practice feature) ──
+  html += '<div id="scenarioHero" class="scenario-hero">';
+  html += '<div class="scenario-hero-glow"></div>';
+  html += '<div class="scenario-hero-top"><span class="scenario-hero-badge">OSCE</span><span class="scenario-hero-kicker">Practice stations</span></div>';
+  html += '<div class="scenario-hero-title">🏥 Scenario Generator</div>';
+  html += '<div class="scenario-hero-sub">A fresh OSCE station every time — realistic patient, full clinical picture. Run it, then reveal for the debrief.</div>';
+  html += '<div class="scenario-hero-btn">Generate a Scenario →</div>';
+  html += '</div>';
+
   // Compact daily challenge link on quiz tab
   html += '<div id="dailyChallengeCard" class="daily-compact' + (done ? ' done' : '') + '">';
   html += '<div class="daily-compact-left"><div class="daily-compact-title">📅 Daily Challenge</div>';
@@ -301,7 +310,6 @@ function renderQuizTab() {
   html += '<div class="qmode-card" data-action="timed"><div class="qmode-icon">⚡</div><div class="qmode-name">Timed</div><div class="qmode-desc">30 seconds per question</div></div>';
   html += '<div class="qmode-card" data-action="category"><div class="qmode-icon">🔬</div><div class="qmode-name">Category</div><div class="qmode-desc">Quiz a specific drug class</div></div>';
   html += '<div class="qmode-card" data-action="terms"><div class="qmode-icon">📖</div><div class="qmode-name">Medical Terms</div><div class="qmode-desc">' + TERMS.length + ' terms</div></div>';
-  html += '<div class="qmode-card" data-action="scenario"><div class="qmode-icon">🏥</div><div class="qmode-name">Scenario</div><div class="qmode-desc">OSCE practice generator</div></div>';
   html += '<div class="qmode-card qmode-coming" data-action="comparison"><div class="qmode-icon">💊</div><div class="qmode-name">Comparison</div><div class="qmode-desc">Coming soon</div><div class="qmode-soon-badge">Soon</div></div>';
   html += '</div>';
 
@@ -310,6 +318,12 @@ function renderQuizTab() {
   }
 
   document.getElementById('quizTabContent').innerHTML = html;
+
+  // Scenario hero — the flagship OSCE generator at the top of the tab
+  const scenarioHero = document.getElementById('scenarioHero');
+  if (scenarioHero) {
+    scenarioHero.addEventListener('click', function() { goScenario(); });
+  }
 
   // Attach event listeners cleanly — no inline onclick needed
   const dailyCard = document.getElementById('dailyChallengeCard');
@@ -330,7 +344,6 @@ function renderQuizTab() {
         case 'timed':     goSetup('timed', false);    break;
         case 'category':  goCategoryPicker();         break;
         case 'terms':     goSetup('terms', false);    break;
-        case 'scenario':  goScenario(); break;
         case 'comparison':showToast('Drug Comparison — coming soon'); break;
       }
     });

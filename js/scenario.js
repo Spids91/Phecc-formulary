@@ -72,13 +72,32 @@ function generateScenario(presId) {
                  : age <= 15 ? `${age}-year-old` : `${age}-year-old`;
   const personWord = age <= 15 ? (sex === 'male' ? 'boy' : 'girl')
                                : (sex === 'male' ? 'man' : 'woman');
-  const location = _pick(SCEN_LOCATIONS);
+  const location = _pick(SCEN_LOCATIONS);  // {name, found}
   const dispatch = variant.dispatch
-    .replace('{location}', location)
+    .replace('{location}', location.name)
     .replace('a PATIENT', `a ${ageLabel} ${personWord}`)
     .replace('PATIENT', `${ageLabel} ${personWord}`);
 
-  return { pres, variant, age, sex, band, dispatch, ecg,
+  // Build a COHERENT events line. For an unconscious patient the history can't come
+  // from the patient, so it's framed by how they came to attention — and that framing
+  // must fit the location: you can be "found unresponsive" somewhere you'd be come
+  // across (home, street), but somewhere you travelled to (GP surgery, café) you
+  // "collapsed / became unresponsive there", never "found".
+  const conscious = variant.conscious !== false;  // default conscious unless flagged false
+  let events = variant.events;
+  if (!conscious) {
+    const frame = location.found
+      ? 'Found unresponsive by a bystander.'
+      : `Collapsed and became unresponsive at ${location.name}.`;
+    events = `${frame} ${variant.events}`;
+  }
+
+  // Last oral intake: an unresponsive patient can't tell you — Unknown is the honest,
+  // realistic value rather than fabricating a history.
+  const lastIntake = conscious ? pres.sample.lastIntake : 'Unknown — patient unresponsive, no reliable history.';
+
+  return { pres, variant, age, sex, band, dispatch, ecg, conscious, location,
+           events, lastIntake,
            vitals: { hr, rr, spo2, sys, dia, temp, bgl } };
 }
 
@@ -102,13 +121,14 @@ function renderScenarioCard(sc) {
     ['Allergies', variant.allergies],
     ['Medications', p.sample.medications],
     ['Past Medical History', p.sample.pmh],
-    ['Last Oral Intake', p.sample.lastIntake],
-    ['Events Leading Up', variant.events],
+    ['Last Oral Intake', sc.lastIntake],
+    ['Events Leading Up', sc.events],
   ];
+  // OPQRST: severity is a 0–10 number. Show "/10" suffix for clarity.
   const opqrst = p.opqrst ? [
     ['Onset', p.opqrst.onset], ['Provocation', p.opqrst.provocation],
     ['Quality', p.opqrst.quality], ['Radiates', p.opqrst.radiates],
-    ['Severity', p.opqrst.severity], ['Time', p.opqrst.time],
+    ['Severity', `${p.opqrst.severity}/10`], ['Time', p.opqrst.time],
   ] : [];
 
   const sec = (title, rows) => `
@@ -157,7 +177,10 @@ function renderScenarioCard(sc) {
       const open = rv.style.display !== 'none';
       rv.style.display = open ? 'none' : 'block';
       rb.textContent = open ? 'Reveal Diagnosis & Management' : 'Hide Diagnosis & Management';
-      if (!open) rv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // Land the Diagnosis bubble near the top of the screen (not just barely in view).
+      if (!open) {
+        requestAnimationFrame(() => rv.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      }
       haptic();
     });
     document.getElementById('scenNewBtn')?.addEventListener('click', () => { startScenario(); haptic(); });
@@ -215,6 +238,26 @@ function openScenarioRunner() {
 }
 
 function startScenario(presId) {
-  const sc = generateScenario(presId);
-  renderScenarioCard(sc);
+  const wrap = document.getElementById('scenarioContent');
+  // Brief "generating" beat — hints that each station is freshly built, and stops
+  // the card from just popping in. ~900ms, then render.
+  if (wrap) {
+    wrap.innerHTML = `
+      <div class="scen-generating">
+        <div class="scen-gen-pulse"><div></div><div></div><div></div></div>
+        <div class="scen-gen-text" id="scenGenText">Building a fresh station…</div>
+      </div>`;
+    const msgs = ['Building a fresh station…', 'Setting the scene…', 'Generating vitals…', 'Taking the history…'];
+    let mi = 0;
+    const textEl = document.getElementById('scenGenText');
+    const cyc = setInterval(() => { mi = (mi + 1) % msgs.length; if (textEl) textEl.textContent = msgs[mi]; }, 280);
+    setTimeout(() => {
+      clearInterval(cyc);
+      const sc = generateScenario(presId);
+      renderScenarioCard(sc);
+    }, 900);
+  } else {
+    const sc = generateScenario(presId);
+    renderScenarioCard(sc);
+  }
 }

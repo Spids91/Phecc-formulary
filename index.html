@@ -74,10 +74,18 @@
         <div class="onb-title">Track your mastery</div>
         <div class="onb-text">Earn XP, build streaks and watch every drug progress from Novice to Mastered. Over 700 questions across drugs and medical terms — all in one place.</div>
       </div>
+
+      <!-- Panel 4: OSCE scenarios -->
+      <div class="onb-panel" data-panel="3">
+        <div class="onb-icon">🏥</div>
+        <div class="onb-title">Practise OSCE scenarios</div>
+        <div class="onb-text">Generate a fresh OSCE station any time — a realistic patient with a full clinical picture, different every run. Run it solo or as a group, then reveal the diagnosis and Paramedic-scope management for the debrief.</div>
+      </div>
     </div>
 
     <div class="onb-dots" id="onbDots">
       <span class="onb-dot active"></span>
+      <span class="onb-dot"></span>
       <span class="onb-dot"></span>
       <span class="onb-dot"></span>
     </div>
@@ -112,6 +120,17 @@
       <div class="settings-row" onclick="replayOnboarding()">
         <div class="settings-row-icon">👋</div>
         <div class="settings-row-label">View Welcome Guide</div>
+        <div class="settings-row-arrow">›</div>
+      </div>
+      <div class="settings-section-label">Support</div>
+      <div class="settings-row" onclick="window.location.href='mailto:support@airevalearning.com'">
+        <div class="settings-row-icon">✉️</div>
+        <div class="settings-row-label">Contact Us</div>
+        <div class="settings-row-arrow">›</div>
+      </div>
+      <div class="settings-row" onclick="window.open('https://airevalearning.com','_blank')">
+        <div class="settings-row-icon">🌐</div>
+        <div class="settings-row-label">Visit Website</div>
         <div class="settings-row-arrow">›</div>
       </div>
       <div class="settings-section-label">Legal</div>
@@ -487,7 +506,7 @@
   </button>
   <button class="nb nb-quiz" id="btn-quiz" onclick="showPage('quiz',this);scrollTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.8" fill="currentColor" stroke="none"/></svg>
-    Quiz
+    Practice
   </button>
   <button class="nb" id="btn-learn" onclick="showPage('learn',this);scrollTop()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5C5 5 8 5.5 10.5 7.5V20C8 18.5 5 18 2 18.5V5.5z"/><path d="M22 5.5C19 5 16 5.5 13.5 7.5V20C16 18.5 19 18 22 18.5V5.5z"/><line x1="12" y1="8" x2="12" y2="20.5"/></svg>

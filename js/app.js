@@ -395,7 +395,7 @@ function dismissDisclaimer(){
 
 // ── ONBOARDING ────────────────────────────────────────────────────────────────
 let onbStep=0;
-const ONB_TOTAL=3;
+const ONB_TOTAL=4;
 
 function startOnboarding(){
   onbStep=0;
