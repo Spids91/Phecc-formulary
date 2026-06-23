@@ -84,16 +84,24 @@ function buildDet(d) {
 
   function renderDoseString(str) {
     const lines = str.split('\n').map(l => l.trim()).filter(Boolean);
-    // A "label" is a short leading phrase before the first colon that names a
-    // severity, scenario or indication (not a time like "after 4–6hrs").
-    // We treat a line as labelled only if the colon comes early and the label
-    // contains no digits (so "1g PO" or "Recheck BGL..." stay plain).
+    // A "label" is the text before the first colon when that colon introduces a
+    // dose for a scenario/indication/age-band (e.g. "Anaphylaxis:", "≥12yr:",
+    // "Burns >25% TBSA and/or 1 hour from injury to ED:"). We treat the colon as a
+    // real label separator only when the label has no sentence-ending period before
+    // it (which would mean the colon sits mid-sentence, e.g. "300mg PO. (≥75 years:")
+    // and the body after the colon actually contains a dose. This lets long
+    // multi-indication labels and numeric age bands form cards while plain dose
+    // sentences and instructions stay as clean text.
+    const bodyHasDose = b => /\d|mcg|mg|mL|ml|\bg\b|\bL\b|%|NEB|MDI|consider|fluid/i.test(b);
     const parsed = lines.map(line => {
       const ci = line.indexOf(':');
-      if (ci > 0 && ci <= 28) {
+      if (ci > 0) {
         const label = line.slice(0, ci).trim();
         const body = line.slice(ci + 1).trim();
-        const looksLikeLabel = !/\d/.test(label) && body.length > 0 && label.split(' ').length <= 4;
+        const looksLikeLabel = body.length > 0 &&
+          label.length <= 90 && label.split(' ').length <= 14 &&
+          !/\.\s/.test(label) && !/\.$/.test(label) &&
+          bodyHasDose(body);
         if (looksLikeLabel) return { label, body };
       }
       return { label: null, body: line };
