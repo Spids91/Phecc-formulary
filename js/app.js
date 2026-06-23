@@ -1,5 +1,16 @@
 // ─── APP.JS — Aireva Medic ───────────────────────────────────────────────────────
+// Core app shell: progression model (levels, XP, mastery), badges, the persistent
+// save object G, the streak/freeze system, navigation, onboarding, header/stats
+// rendering, and global search. Other files lean on what's defined here:
+//   • G            — the single persisted save object (localStorage key below).
+//   • getLevel/getMastery/getDM — derive progression state from raw counts.
+//   • saveG/loadG  — persist and restore G (loadG also migrates old saves).
+//   • checkBadges  — re-evaluated after anything that could unlock a badge.
+// Quiz logic lives in quiz.js; the drug-detail overlay in detail.js.
 
+// Level thresholds. getLevel() walks DOWN from the top so the highest level whose
+// xp floor is met wins. "next" is the XP needed to reach the following level
+// (Infinity for the final level). gradient/color drive the header + level-up card.
 const LEVELS=[
   {name:"Rookie",          xp:0,     next:250,      color:"#475569",gradient:"linear-gradient(135deg,#0F172A,#334155)"},
   {name:"Student",         xp:250,   next:750,      color:"#0891B2",gradient:"linear-gradient(135deg,#0C4A6E,#0891B2)"},
@@ -11,6 +22,9 @@ const LEVELS=[
 ];
 function getLevel(xp){for(let i=LEVELS.length-1;i>=0;i--)if(xp>=LEVELS[i].xp)return LEVELS[i];return LEVELS[0];}
 
+// Mastery tier from a drug's cumulative correct-answer count. These thresholds
+// also feed the spaced-repetition intervals in quiz.js, so changing them shifts
+// both the badges/labels AND how often a drug resurfaces for review.
 function getMastery(correct){
   if(correct>=10)return'mastered';
   if(correct>=6)return'proficient';
@@ -73,6 +87,12 @@ let G={
   nightShiftDone:false
 };
 
+// Load the saved game state, then BACKFILL any fields missing from older saves.
+// This migration matters: a user who installed an earlier version has a G without
+// newer keys (recentWrong, fcXpToday, nightShiftDone, etc). Spreading the saved
+// JSON over the default G and then filling gaps means new features never crash on
+// an old save. The localStorage key stays 'tusMedicG101' deliberately — renaming
+// it would orphan every existing user's progress.
 function loadG(){
   try{const s=localStorage.getItem('tusMedicG101');if(s)G={...G,...JSON.parse(s)};}catch(e){}
   MEDS.forEach(m=>{
@@ -244,7 +264,9 @@ function checkBadges(){
       newBadges.push(b);
     }
   });
-  // Earn freeze tokens at milestones
+  // Earn freeze tokens at mastery milestones: 1 base + 1 per 10 drugs mastered,
+  // capped at 5. We compare against (held + already-used) so a token is granted
+  // once per milestone reached, not re-granted after one is spent.
   const masteredCount=Object.values(G.drugCorrect).filter(v=>v>=10).length;
   const expectedTokens=1+Math.floor(masteredCount/10);
   if(expectedTokens>G.freezeTokens+G.freezesUsed){

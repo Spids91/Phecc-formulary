@@ -1,8 +1,27 @@
 // ─── QUIZ.JS v1.0.0 ───────────────────────────────────────────────────────────
-// Clean rewrite — daily challenge, standard, adaptive, weak spots,
-// timed, category, spaced repetition, streak burst, wrong answer breakdown
+// The entire quiz engine. Modes: daily challenge, standard, adaptive, weak spots,
+// timed, category, spaced repetition, plus the intro quiz. Two answer formats:
+// multiple-choice (auto-marked) and flashcard (self-marked).
+//
+// How it fits together:
+//   • QUESTION BANKS (EASY_Q/HARD_Q/TERM_Q) are templates: each has a q() that
+//     builds the question text and an a() that derives the answer LIVE from the
+//     drug/term data. Because answers are derived, editing a drug's data updates
+//     its quiz answers automatically — there are no hard-coded answer strings.
+//   • make*Qs() functions assemble a question list for a given mode.
+//   • QZ (below) is the in-memory state for the quiz currently being taken.
+//   • G (global, defined elsewhere) is the PERSISTENT save: xp, mastery counts,
+//     streaks, spaced-repetition schedule, badge counters. saveG() persists it.
+//
+// Two things that are easy to get wrong and are guarded carefully below:
+//   1. Flashcard XP is self-marked, so it's capped per day (FC_XP_CAP) to stop
+//      users farming unlimited XP. MC XP is not capped.
+//   2. XP earned in a session accumulates into QZ.xpThis and is committed to G.xp
+//      ONCE at the results screen — never mid-quiz — to avoid double-counting.
 
 // ── QUESTION BANKS ────────────────────────────────────────────────────────────
+// Each template's a() reads live from the drug/term, so answers always reflect
+// the current data. EASY = recall; HARD = deeper understanding.
 const EASY_Q = [
   { id:'ind',   prompt:'Indications',      q: d => `What are the main indications for ${d.name}?`,           a: d => d.indications.slice(0,3).join('; ') },
   { id:'dose',  prompt:'Adult Dosage',     q: d => `What is the adult dose of ${d.name}?`,                   a: d => typeof d.dosages.adult === 'string' ? d.dosages.adult : Object.values(d.dosages.adult).join(' | ') },
@@ -37,9 +56,16 @@ const CATEGORIES = [
 ];
 
 // ── SPACED REPETITION ─────────────────────────────────────────────────────────
+// After each answer we schedule the drug's next review. A CORRECT answer pushes
+// the next review further out the more mastered the drug is (longer gaps for
+// well-known drugs); a WRONG answer brings it back tomorrow and adds the drug to
+// the "recent wrong" list that powers Weak Spots. nextReview stores a YYYY-MM-DD
+// date string per drug; isDue() compares it against today.
 function srNextDate(drugId, correct) {
   if (!G.nextReview) G.nextReview = {};
   const d = new Date();
+  // Interval in days, scaled by current mastery (only when answered correctly).
+  // Wrong answers always come back in 1 day.
   const days = correct
     ? { unseen:2, novice:3, learning:5, proficient:8, mastered:14 }[getMastery(G.drugCorrect[drugId]||0)] || 3
     : 1;
@@ -47,6 +73,7 @@ function srNextDate(drugId, correct) {
   G.nextReview[drugId] = d.toISOString().slice(0,10);
   if (!correct) {
     if (!G.recentWrong) G.recentWrong = [];
+    // Most-recent-first, capped at 20 so Weak Spots stays a recent-mistakes list.
     if (!G.recentWrong.includes(drugId)) G.recentWrong.unshift(drugId);
     G.recentWrong = G.recentWrong.slice(0,20);
   }
@@ -161,6 +188,10 @@ function makeTermQs(n=10) {
 }
 
 // ── DAILY CHALLENGE ───────────────────────────────────────────────────────────
+// The daily challenge must be the SAME 5 questions for everyone on a given day and
+// stable if the page reloads — so it can't use Math.random(). Instead we derive a
+// seed from the day number (days since epoch) and use a deterministic seeded RNG.
+// Same seed → same questions all day; next day → new seed → new set.
 function dailySeed() { return Math.floor(Date.now()/86400000); }
 function seededRnd(seed,i) { const x=Math.sin(seed*9301+i*49297+233)*100000; return x-Math.floor(x); }
 
@@ -270,7 +301,7 @@ function renderQuizTab() {
   html += '<div class="qmode-card" data-action="timed"><div class="qmode-icon">⚡</div><div class="qmode-name">Timed</div><div class="qmode-desc">30 seconds per question</div></div>';
   html += '<div class="qmode-card" data-action="category"><div class="qmode-icon">🔬</div><div class="qmode-name">Category</div><div class="qmode-desc">Quiz a specific drug class</div></div>';
   html += '<div class="qmode-card" data-action="terms"><div class="qmode-icon">📖</div><div class="qmode-name">Medical Terms</div><div class="qmode-desc">' + TERMS.length + ' terms</div></div>';
-  html += '<div class="qmode-card qmode-coming" data-action="scenario"><div class="qmode-icon">🏥</div><div class="qmode-name">Scenario</div><div class="qmode-desc">Coming soon</div><div class="qmode-soon-badge">Soon</div></div>';
+  html += '<div class="qmode-card" data-action="scenario"><div class="qmode-icon">🏥</div><div class="qmode-name">Scenario</div><div class="qmode-desc">OSCE practice generator</div></div>';
   html += '<div class="qmode-card qmode-coming" data-action="comparison"><div class="qmode-icon">💊</div><div class="qmode-name">Comparison</div><div class="qmode-desc">Coming soon</div><div class="qmode-soon-badge">Soon</div></div>';
   html += '</div>';
 
@@ -299,7 +330,7 @@ function renderQuizTab() {
         case 'timed':     goSetup('timed', false);    break;
         case 'category':  goCategoryPicker();         break;
         case 'terms':     goSetup('terms', false);    break;
-        case 'scenario':  showToast('Scenario Mode — coming soon'); break;
+        case 'scenario':  goScenario(); break;
         case 'comparison':showToast('Drug Comparison — coming soon'); break;
       }
     });
