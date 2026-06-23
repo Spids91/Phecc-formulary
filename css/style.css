@@ -1526,3 +1526,8 @@ ul { list-style: none; }
 .scen-drugs li { font-size:14px; color:var(--text2); line-height:1.5; }
 .scen-disclaimer { font-size:12px; color:var(--text3); line-height:1.5; font-style:italic;
   padding:10px 12px; background:var(--surf2); border-radius:var(--r8); }
+
+/* AP-scope route pill inside scenario reveal drugs */
+.scen-ap-pill { display:inline-block; margin-top:5px; font-size:12px; font-weight:600;
+  color:#fff; background:var(--warning); padding:3px 9px; border-radius:var(--r-pill); }
+.scen-drugs li { margin-bottom:9px; }
