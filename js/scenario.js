@@ -162,7 +162,8 @@ function renderScenarioCard(sc) {
 }
 
 // ── ENTRY POINTS ─────────────────────────────────────────────────────────────────
-// Open the scenario view inside the quiz tab (back bar + container).
+// Open the Scenario landing page inside the quiz tab: explains the feature and lets
+// the user start. (Future: this is where a presentation/category picker will live.)
 function goScenario() {
   window.scrollTo({ top: 0, behavior: 'instant' });
   const wrap = document.getElementById('quizTabContent');
@@ -171,12 +172,45 @@ function goScenario() {
     <div class="quiz-back-sticky" id="scenBack">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
     </div>
-    <div class="pg-title">🏥 OSCE Scenario</div>
-    <div class="pg-sub">A fresh practice station every time. Run it as a group, then reveal for the debrief.</div>
-    <div id="scenarioContent"></div>`;
+    <div class="pg-title">🏥 OSCE Scenario Generator</div>
+    <div class="pg-sub">Practice stations for OSCE prep, generated fresh every time.</div>
+
+    <div class="scen-intro">
+      <div class="scen-intro-card">
+        <div class="scen-intro-icon">🎲</div>
+        <div class="scen-intro-txt"><strong>A new station each time</strong><br>Random patient, plausible vitals, and a full clinical picture. The numbers change every run, so you reason it out rather than memorise.</div>
+      </div>
+      <div class="scen-intro-card">
+        <div class="scen-intro-icon">👥</div>
+        <div class="scen-intro-txt"><strong>Built for syndicate practice</strong><br>Two people step out, the group sets up the station, then run it like a real OSCE. Everyone but the candidates knows what it is.</div>
+      </div>
+      <div class="scen-intro-card">
+        <div class="scen-intro-icon">📋</div>
+        <div class="scen-intro-txt"><strong>Reveal for the debrief</strong><br>After the station, tap to reveal the diagnosis, pathway and Paramedic-scope management to anchor the discussion.</div>
+      </div>
+    </div>
+
+    <button class="btn-pri" id="scenStartBtn">Generate a Scenario</button>
+    <div class="scen-intro-note">Scenarios are study practice only. Always follow your current clinical practice guidelines.</div>`;
   document.getElementById('scenBack')?.addEventListener('click', renderQuizTab);
+  document.getElementById('scenStartBtn')?.addEventListener('click', () => { openScenarioRunner(); haptic(); });
+}
+
+// The runner view: the back bar returns to the landing page, and a container the
+// generated station card renders into.
+function openScenarioRunner() {
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  const wrap = document.getElementById('quizTabContent');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div class="quiz-back-sticky" id="scenRunnerBack">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
+    </div>
+    <div id="scenarioContent"></div>`;
+  document.getElementById('scenRunnerBack')?.addEventListener('click', goScenario);
   startScenario();
 }
+
 function startScenario(presId) {
   const sc = generateScenario(presId);
   renderScenarioCard(sc);

@@ -1531,3 +1531,13 @@ ul { list-style: none; }
 .scen-ap-pill { display:inline-block; margin-top:5px; font-size:12px; font-weight:600;
   color:#fff; background:var(--warning); padding:3px 9px; border-radius:var(--r-pill); }
 .scen-drugs li { margin-bottom:9px; }
+
+/* Scenario landing page */
+.scen-intro { display:flex; flex-direction:column; gap:12px; margin:4px 0 22px; }
+.scen-intro-card { display:flex; gap:14px; align-items:flex-start; background:var(--surf);
+  border:1px solid var(--border); border-radius:var(--r12); padding:14px 16px; }
+.scen-intro-icon { font-size:24px; flex:0 0 auto; line-height:1.2; }
+.scen-intro-txt { font-size:14px; color:var(--text2); line-height:1.5; }
+.scen-intro-txt strong { color:var(--text); font-weight:700; }
+.scen-intro-note { font-size:12px; color:var(--text3); text-align:center; margin-top:14px;
+  line-height:1.5; font-style:italic; }
