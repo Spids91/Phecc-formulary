@@ -1,6 +1,15 @@
 // ─── DETAIL.JS ────────────────────────────────────────────────────────────────
+// Builds and controls the drug-detail overlay: the full-screen panel that opens
+// when a drug is tapped. Responsible for rendering every section of a drug
+// (presentation, routes, indications, contraindications, dosages, side effects,
+// additional info, question-progress bar, personal notes) and for the overlay's
+// scroll/condense behaviour and per-drug note saving.
+//
+// The trickiest piece here is renderDoseString (below): it decides which dose
+// lines become labelled "bubbles" (cards) vs plain text. See its own comment.
 
-// Debounced note saving — waits 800ms after last keystroke before writing to localStorage
+// Debounced note saving — waits 800ms after the last keystroke before writing to
+// localStorage, so we're not saving on every character as the user types.
 let _noteTimer=null;
 function noteDebounce(id,val){
   G.notes[id]=val;
@@ -12,6 +21,8 @@ function noteDebounce(id,val){
 function openDet(id) {
   const d = MEDS.find(m => m.id === id);
   if (!d) return;
+  // Record that this drug has been viewed. seenDrugs drives the "unseen vs seen"
+  // mastery state and some badges, so it must be marked the moment the drug opens.
   if (!G.seenDrugs.includes(id)) G.seenDrugs.push(id);
   document.getElementById('detName').textContent  = d.name;
   document.getElementById('detBarName').textContent = d.name;  // condensed name in pinned bar
@@ -47,6 +58,8 @@ function onDetScroll() {
 function closeDet() {
   document.getElementById('detOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  // On exit: re-evaluate badges (viewing/notes may have unlocked one), persist
+  // state, and re-render the drug list so any mastery/seen changes show straight away.
   checkBadges();
   saveG();
   renderDrugList();
