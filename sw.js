@@ -1,9 +1,8 @@
-const C='tus-medic-20260623171208';
-const BASE='/Tus-Medic';
-const ASSETS=[BASE+'/',BASE+'/index.html',BASE+'/manifest.json',BASE+'/css/style.css',
-  BASE+'/js/data/medications.js',BASE+'/js/data/hospitals.js',BASE+'/js/data/terms.js',BASE+'/js/data/medref.js',BASE+'/js/data/scenarios.js',
-  BASE+'/js/app.js',BASE+'/js/home.js',BASE+'/js/reference.js',BASE+'/js/medref.js',BASE+'/js/detail.js',
-  BASE+'/js/quiz.js',BASE+'/js/scenario.js',BASE+'/js/study.js',BASE+'/js/settings.js'];
+const C='aireva-20260624092158';
+const ASSETS=['./','./index.html','./manifest.json','./css/style.css',
+  './js/data/medications.js','./js/data/hospitals.js','./js/data/terms.js','./js/data/medref.js','./js/data/scenarios.js',
+  './js/app.js','./js/home.js','./js/reference.js','./js/medref.js','./js/detail.js',
+  './js/quiz.js','./js/scenario.js','./js/study.js','./js/settings.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
 self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res&&res.status===200&&e.request.method==='GET'){const c=res.clone();caches.open(C).then(cache=>cache.put(e.request,c));}return res;})));});
