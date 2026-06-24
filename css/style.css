@@ -1449,38 +1449,36 @@ ul { list-style: none; }
 /* ── QUIZ NAV BUTTON — raised hero button ─────────────────────────────────── */
 .nb.nb-quiz {
   position: relative;
-  margin-top: -14px;
-  background: var(--primary);
+  align-self: center;
+  margin-top: -22px;
+  background: linear-gradient(145deg, #3B82F6 0%, #2563EB 55%, #1D4ED8 100%);
   border-radius: 50%;
   width: 52px; height: 52px;
-  box-shadow: 0 4px 16px rgba(37,99,235,.5);
+  box-shadow: 0 6px 18px rgba(37,99,235,.45), inset 0 1px 0 rgba(255,255,255,.25);
   color: #fff !important;
   flex: 0 0 52px;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding: 0;
-  gap: 0;
   font-size: 0;
   line-height: 0;
 }
-.nb.nb-quiz svg { width: 24px; height: 24px; stroke-width: 2; flex-shrink: 0; }
+.nb.nb-quiz svg { width: 24px; height: 24px; stroke-width: 2; display: block; flex-shrink: 0; }
 .nb.nb-quiz::after { display: none; }
 .nb.nb-quiz.active { background: var(--primary-dark); }
 /* Quiz label — positioned to sit level with other nav labels outside the bubble */
 .nb.nb-quiz::before {
   content: 'Practice';
   position: absolute;
-  /* Other labels sit ~8px below their icon; the bubble is raised 14px,
-     so the label needs to be 14px + icon height + gap below bubble top */
-  bottom: -20px;
+  bottom: -15px;
   left: 50%; transform: translateX(-50%);
   font-size: 9px; font-weight: 600; letter-spacing: .2px;
-  color: rgba(255,255,255,.7);
+  color: rgba(255,255,255,.55);
   white-space: nowrap;
   line-height: 1;
 }
+.nb.nb-quiz.active::before { color: #fff; }
 
 /* ── ONBOARDING TAPPABLE BULLETS ─────────────────────────────────────────── */
 .onb-bullet-tap { cursor: pointer; transition: background var(--dur-fast) var(--ease); }
