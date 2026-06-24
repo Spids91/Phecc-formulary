@@ -120,7 +120,7 @@ function saveG(){
     // Storage full or unavailable — notify user once per session
     if(!saveG._warned){
       saveG._warned=true;
-      showToast('⚠️ Could not save progress — storage may be full');
+      showToast('⚠️ Could not save progress, storage may be full');
     }
   }
 }
@@ -192,7 +192,7 @@ function checkStreakOnLoad(){
   if(!G.lastDate||G.streak<=0)return;       // no active streak to protect
   const today=todayKey();
   const gap=daysBetween(G.lastDate, today);
-  if(gap<=1)return;                          // same day or yesterday — streak healthy
+  if(gap<=1)return;                          // same day or yesterday, streak healthy
   // gap>=2 means at least one full calendar day was missed
   const missedDays=gap-1;
   const tokens=G.freezeTokens||0;
@@ -240,17 +240,17 @@ function closeFreezeModal(){
 // Manual freeze button (home screen) — now explains the freeze is automatic.
 function useFreeze(){
   if(G.lastDate===todayKey()){
-    showToast('Your streak is safe — you\u2019ve already studied today');
+    showToast('Your streak is safe, you\u2019ve already studied today');
     return;
   }
   const tokens=G.freezeTokens||0;
   if(tokens<=0){
-    showToast('No freeze tokens — master more drugs to earn them');
+    showToast('No freeze tokens, master more drugs to earn them');
     return;
   }
   showConfirm(
     '\u2744\uFE0F Streak Freeze',
-    'You have '+tokens+' freeze '+(tokens===1?'token':'tokens')+'. Freezes are used automatically to protect your streak if you miss a day — you don\u2019t need to do anything now.',
+    'You have '+tokens+' freeze '+(tokens===1?'token':'tokens')+'. Freezes are used automatically to protect your streak if you miss a day, you don\u2019t need to do anything now.',
     ()=>{}
   );
 }
@@ -579,7 +579,7 @@ function showBadgeInfo(i){
   const b=BADGES[i];
   if(!b)return;
   const earned=G.earnedBadges.includes(b.id);
-  showToast(`${b.icon} ${b.name} — ${b.desc}${earned?' ✓':''}`);
+  showToast(`${b.icon} ${b.name}: ${b.desc}${earned?' ✓':''}`);
   haptic();
 }
 
@@ -730,7 +730,7 @@ function handleGlobalSearch(q,clearId,resultsId){
       }}));
 
     HOSPITALS.filter(h=>h.name.toLowerCase().includes(ql)||h.pcr.toLowerCase().includes(ql)||h.county.toLowerCase().includes(ql))
-      .slice(0,3).forEach(h=>results.push({type:'hospital',name:h.name,sub:`${h.county} — PCR: ${h.pcr}`,action:()=>{
+      .slice(0,3).forEach(h=>results.push({type:'hospital',name:h.name,sub:`${h.county}, PCR: ${h.pcr}`,action:()=>{
         showPage('ref',document.getElementById('btn-ref'));
         selRefSection('pcr',document.querySelector('[data-refsec="pcr"]'));
         // Wait for both showPage and section render to complete before scrolling

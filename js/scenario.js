@@ -117,14 +117,14 @@ function generateScenario(presId) {
 
   // Last oral intake: an unresponsive patient can't tell you — Unknown is the honest,
   // realistic value rather than fabricating a history.
-  const lastIntake = conscious ? pres.sample.lastIntake : 'Unknown — patient unresponsive, no reliable history.';
+  const lastIntake = conscious ? pres.sample.lastIntake : 'Unknown, patient unresponsive, no reliable history.';
 
   // For an UNCONSCIOUS patient, almost no reliable history is obtainable — the student's
   // learning is to assess (vitals/BGL), NOT to interrogate a bystander and hope they
   // mention "diabetic". So SAMPLE/OPQRST default to "Unknown" — EXCEPT Events Leading Up,
   // which can carry the witnessed-collapse framing (a bystander plausibly saw them go
   // down even if they know nothing else about them).
-  const UNK = 'Unknown — no reliable history available.';
+  const UNK = 'Unknown, no reliable history available.';
   const UNK_SHORT = 'Unknown';
   const sample = conscious ? {
     symptoms:    pres.sample.symptoms,
@@ -249,7 +249,7 @@ function renderScenarioCard(sc) {
         ${renderRevealField('Pathway', p.reveal.pathwayBlocks, p.reveal.pathway)}
         ${renderRevealField('Interventions', p.reveal.interventionsBlocks, p.reveal.interventions)}
         <div class="scen-sec"><div class="scen-sec-title">Drugs &amp; Doses (Paramedic scope)</div><ul class="scen-drugs">${drugLines}</ul></div>
-        <div class="scen-disclaimer">For study practice only — not a clinical reference. Generated vital signs are for practice and may not be physiologically exact. Always follow current clinical practice guidelines.</div>
+        <div class="scen-disclaimer">For study practice only, not a clinical reference. Generated vital signs are for practice and may not be physiologically exact. Always follow current clinical practice guidelines.</div>
       </div>
       <button class="scen-new-btn" id="scenNewBtn">Generate New Scenario</button>
     </div>`;
