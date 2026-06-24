@@ -478,4 +478,97 @@ const PRESENTATIONS = [
       ],
     },
   },
+
+  {
+    id: 'fbao',
+    name: 'Foreign Body Airway Obstruction',
+    demographics: { minAge: 16, maxAge: 90, sex: 'any' },
+    variants: [
+      // SEVERE + CONSCIOUS → back blows / abdominal thrusts.
+      { cause:'choking on food — severe, conscious', conscious:true,
+        dispatch:'You are called to {location} for a PATIENT who is choking.',
+        presentation:'Clutching at their throat, distressed and unable to speak, coughing weakly and ineffectively, lips dusky, eyes wide and frightened. Still conscious and trying to cough.',
+        allergies:'No known drug allergies.',
+        events:'Choked suddenly partway through a meal; bystanders saw them grab their throat and struggle to breathe.' },
+      { cause:'choking — severe, near-silent', conscious:true,
+        dispatch:'You are called to {location} for a PATIENT in respiratory distress, unable to talk.',
+        presentation:'Silent, cannot cough or speak, gripping the throat, pale and panicked, making minimal air movement. Conscious but visibly tiring.',
+        allergies:'No known drug allergies.',
+        events:'Was eating when they suddenly went quiet and could not breathe; a bystander recognised choking and called immediately.' },
+      // MILD → encourage cough, monitor.
+      { cause:'mild obstruction — effective cough', conscious:true,
+        dispatch:'You are called to {location} for a PATIENT who choked but is still coughing.',
+        presentation:'Coughing forcefully and effectively, able to speak in short sentences between coughs, anxious but moving good air, colour normal. Airway partially obstructed but cough is effective.',
+        allergies:'No known drug allergies.',
+        events:'Choked on food a few minutes ago and has been coughing hard since; able to tell you what happened.' },
+      // SEVERE + UNCONSCIOUS → request ALS, CPR cycles, mouth check.
+      { cause:'choking — now unconscious', conscious:false,
+        dispatch:'You are called to {location} for a PATIENT who was choking and has collapsed.',
+        presentation:'Unresponsive, not breathing effectively, cyanosed around the lips, no cough or gag. Airway obstructed; no air movement.',
+        allergies:'No known drug allergies.',
+        events:'Was choking on food and witnessed to slump unconscious moments before your arrival.' },
+      { cause:'found collapsed — suspected FBAO', conscious:false,
+        dispatch:'You are called to {location} for a PATIENT found unresponsive after a meal.',
+        presentation:'Unresponsive, cyanosed, no effective breathing, food debris around the mouth. No cough or gag; airway appears obstructed.',
+        allergies:'No known drug allergies.',
+        events:'Found slumped at the table shortly after eating; suspected choking.' },
+      { cause:'choking — peri-arrest', conscious:false,
+        dispatch:'You are called to {location} for an unconscious PATIENT who was choking.',
+        presentation:'Unresponsive and deeply cyanosed, no effective ventilation despite airway manoeuvres, agonal at best. Obstruction unresolved.',
+        allergies:'No known drug allergies.',
+        events:'Choked, then rapidly deteriorated to unconsciousness; bystander CPR was just starting as you arrived.' },
+    ],
+    painBased: false,   // FBAO is not a pain complaint → OPQRST shows honest negatives
+    // ⚠️ PLACEHOLDER deviations — Keith approved direction; ranges paint a hypoxic
+    // respiratory-distress picture. SpO₂ driven LOW (defining); HR/RR raised.
+    deviations: {
+      spo2: [84, 92],                    // hypoxia (absolute range)
+      hr:  { dir:'up', intensity:0.5 },  // hypoxic/adrenergic tachycardia
+      rr:  { dir:'up', intensity:0.5 },  // respiratory distress
+      // bp / bgl / temp omitted → stay normal
+    },
+    sample: {
+      symptoms:'Sudden onset choking, inability to speak or cough effectively, distress, cyanosis.',
+      medications:'None relevant / unknown.',
+      pmh:'Nil of note.',
+      lastIntake:'Was eating immediately before onset.',
+    },
+    opqrst: {
+      onset:'Sudden, while eating.',
+      provocation:'No pain — the problem is being unable to breathe.',
+      quality:'No pain; a sense of choking / suffocation.',
+      radiates:'No.',
+      severity:'0',
+      time:'Came on suddenly minutes ago.',
+    },
+    reveal: {
+      diagnosis:'Foreign Body Airway Obstruction (FBAO). Grade by severity of obstruction — this drives everything. Mild (effective cough): can cough, speak or breathe — do not interfere, encourage coughing. Severe (ineffective cough): cannot cough effectively, speak or breathe — needs active intervention.',
+      pathway:'Assess severity: ask "are you choking?" and judge the effectiveness of the cough. Mild — effective cough: encourage coughing, monitor for adequate ventilation and deterioration, consider oxygen therapy, transport. Severe — conscious: give 1–5 back blows, then 1–5 abdominal thrusts as indicated, reassessing after each; continue alternating while the patient remains conscious and the obstruction is unresolved. Severe — unconscious: request ALS, begin one cycle of CPR, and after each cycle open the mouth and look for the object (if visible, make one attempt to remove it); reassess effectiveness, and if still ineffective after CPR cycles go to the BLS Adult CPG. If ventilations are not adequate, deliver positive pressure ventilations at a maximum of 10 per minute, with oxygen therapy throughout.',
+      interventions:'Recognise FBAO and assess severity (effective vs ineffective cough). Mild: encourage coughing, do not interfere, monitor. Severe / conscious: 1–5 back blows then 1–5 abdominal thrusts, alternating, reassessing after each. Severe / unconscious: request ALS, commence CPR, check the mouth after each cycle and remove a visible object with one attempt. Support ventilation with PPV (max 10/min) if inadequate; oxygen therapy throughout; transport. Laryngoscopy, Magill forceps, intubation and needle cricothyrotomy are Advanced Paramedic interventions and outside this pathway.',
+      diagnosisBlocks: [
+        { type:'lead', body:'Foreign Body Airway Obstruction (FBAO). Grade by severity of obstruction — this drives everything.' },
+        { type:'grade', label:'Mild (effective cough)', sev:'mild', body:'Can cough, speak or breathe. Do NOT interfere — encourage coughing.' },
+        { type:'grade', label:'Severe (ineffective cough)', sev:'sev', body:'Cannot cough effectively, speak or breathe; silent or weak cough, cyanosis, distress. Needs active intervention.' },
+      ],
+      pathwayBlocks: [
+        { type:'lead', body:'Assess severity: ask "are you choking?" and judge the effectiveness of the cough.' },
+        { type:'branch', label:'Mild — effective cough', body:'Encourage coughing. Monitor for adequate ventilation and deterioration. Consider oxygen therapy. Transport.' },
+        { type:'branch', label:'Severe — conscious', body:'Give 1–5 back blows, then 1–5 abdominal thrusts as indicated. Reassess after each. Continue alternating while the patient remains conscious and the obstruction is unresolved.' },
+        { type:'branch', label:'Severe — unconscious', body:'Request ALS. Begin one cycle of CPR. After each cycle, open the mouth and look for the object — if visible, make one attempt to remove it. Reassess effectiveness; if still ineffective after CPR cycles, go to the BLS Adult CPG.' },
+        { type:'note', label:'Ventilation', body:'If ventilations are not adequate, deliver positive pressure ventilations at a maximum of 10 per minute. Provide oxygen therapy throughout.' },
+        { type:'note', label:'After each cycle of CPR', body:'Open the mouth and look for the object; if visible, make one attempt to remove it.' },
+      ],
+      interventionsBlocks: [
+        { type:'step', body:'Recognise FBAO and assess severity (effective vs ineffective cough).' },
+        { type:'step', body:'Mild / effective cough — encourage coughing, do not interfere, monitor.' },
+        { type:'step', body:'Severe / conscious — 1–5 back blows then 1–5 abdominal thrusts, alternating, reassessing after each.' },
+        { type:'step', body:'Severe / unconscious — request ALS, commence CPR, check the mouth after each cycle and remove a visible object with one attempt.' },
+        { type:'step', body:'Support ventilation with PPV (max 10/min) if inadequate; oxygen therapy throughout; transport.' },
+        { type:'note', body:'Laryngoscopy, Magill forceps, intubation and needle cricothyrotomy are Advanced Paramedic interventions and are outside this (EMT/P) pathway.' },
+      ],
+      drugs: [
+        { name:'Oxygen therapy', adult:{ paramedic:'High-flow oxygen as required to maintain adequate saturations; consider throughout.' } },
+      ],
+    },
+  },
 ];
