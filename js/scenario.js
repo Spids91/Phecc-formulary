@@ -132,7 +132,7 @@ function generateScenario(presId) {
   });
 
   return { pres, variant, age, sex, band, dispatch, ecg, conscious, location,
-           events, lastIntake, sample, opqrst,
+           events, lastIntake, sample, opqrst, presentationText,
            vitals: { hr, rr, spo2, sys, dia, temp, bgl } };
 }
 
@@ -195,7 +195,7 @@ function renderScenarioCard(sc) {
       </div>
       <div class="scen-sec"><div class="scen-sec-title">Dispatch</div><div class="scen-dispatch">${sc.dispatch}</div></div>
       ${sec('Patient', [['Age', sc.age < 1 ? sc.band.label : `${sc.age} years`], ['Sex', sc.sex === 'male' ? 'Male' : 'Female']])}
-      <div class="scen-sec"><div class="scen-sec-title">On Arrival</div><div class="scen-dispatch">${presentationText}</div></div>
+      <div class="scen-sec"><div class="scen-sec-title">On Arrival</div><div class="scen-dispatch">${sc.presentationText}</div></div>
       ${sec('Vital Signs', vitalRows)}
       ${sec('SAMPLE History', sampleRows)}
       ${opqrst.length ? sec('OPQRST', opqrst) : ''}
