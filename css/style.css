@@ -1470,7 +1470,7 @@ ul { list-style: none; }
 .nb.nb-quiz.active { background: var(--primary-dark); }
 /* Quiz label — positioned to sit level with other nav labels outside the bubble */
 .nb.nb-quiz::before {
-  content: 'Quiz';
+  content: 'Practice';
   position: absolute;
   /* Other labels sit ~8px below their icon; the bubble is raised 14px,
      so the label needs to be 14px + icon height + gap below bubble top */
