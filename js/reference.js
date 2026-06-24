@@ -253,7 +253,7 @@ function renderPCI(){
   return`<div class="pci-card">
     <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93C5FD">Primary PCI Line</div>
     <div class="pci-number" onclick="callNumber('${PCI_NUMBER.replace(/\s/g,'')}')">${PCI_NUMBER}</div>
-    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:10px">Tap number to dial — then select:</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:10px">Tap number to dial, then select:</div>
     ${PCI_LABS.map(l=>`<div class="pci-row"><div class="pci-num">${l.n}</div><div class="pci-hospital">${l.hospital}</div></div>`).join('')}
   </div>`;
 }

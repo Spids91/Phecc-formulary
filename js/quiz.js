@@ -31,14 +31,14 @@ const EASY_Q = [
 const HARD_Q = [
   { id:'contra',prompt:'Contraindications',  q: d => `Name key contraindications for ${d.name}`,            a: d => d.contraindications.slice(0,3).join('; ') },
   { id:'mech',  prompt:'Mechanism of Action',q: d => `What is the mechanism of action of ${d.name}?`,       a: d => d.quizHints.mechanism },
-  { id:'id',    prompt:'Identify the Drug',  q: d => `"${d.quizHints.keyFact.split('—')[0].trim()}" — which drug?`, a: d => `${d.name} (${d.classification})` },
+  { id:'id',    prompt:'Identify the Drug',  q: d => `"${d.quizHints.keyFact.split('—')[0].trim()}", which drug?`, a: d => `${d.name} (${d.classification})` },
   { id:'class', prompt:'Classification',     q: d => `What class of drug is ${d.name}?`,                    a: d => d.classification },
   { id:'route', prompt:'Administration',     q: d => `What are the routes of administration for ${d.name}?`,a: d => Array.isArray(d.administration) ? d.administration.join(', ') : d.administration },
   { id:'side',  prompt:'Side Effects',       q: d => `Name the main side effects of ${d.name}`,             a: d => d.sideEffects.slice(0,3).join('; ') },
 ];
 const TERM_Q = [
   { prompt:'Define the Term',   q: t => `What does "${t.term}" mean?`,         a: t => t.def },
-  { prompt:'Identify the Term', q: t => `"${t.def.substring(0,80)}…" — what term?`, a: t => t.term },
+  { prompt:'Identify the Term', q: t => `"${t.def.substring(0,80)}…", what term?`, a: t => t.term },
 ];
 
 // ── CATEGORIES ────────────────────────────────────────────────────────────────
@@ -290,7 +290,7 @@ function renderQuizTab() {
   html += '<div class="scenario-hero-glow"></div>';
   html += '<div class="scenario-hero-top"><span class="scenario-hero-badge">OSCE</span><span class="scenario-hero-kicker">Practice stations</span></div>';
   html += '<div class="scenario-hero-title">🏥 Scenario Generator</div>';
-  html += '<div class="scenario-hero-sub">A fresh OSCE station every time — realistic patient, full clinical picture. Run it, then reveal for the debrief.</div>';
+  html += '<div class="scenario-hero-sub">A fresh OSCE station every time: realistic patient, full clinical picture. Run it, then reveal for the debrief.</div>';
   html += '<div class="scenario-hero-btn">Generate a Scenario →</div>';
   html += '</div>';
 
@@ -340,11 +340,11 @@ function renderQuizTab() {
       switch(action) {
         case 'standard':  goSetup('standard', false); break;
         case 'adaptive':  goSetup('adaptive', true);  break;
-        case 'weakspots': weakCount > 0 ? goSetup('weakspots', false) : showToast('No weak spots yet — keep quizzing!'); break;
+        case 'weakspots': weakCount > 0 ? goSetup('weakspots', false) : showToast('No weak spots yet, keep quizzing!'); break;
         case 'timed':     goSetup('timed', false);    break;
         case 'category':  goCategoryPicker();         break;
         case 'terms':     goSetup('terms', false);    break;
-        case 'comparison':showToast('Drug Comparison — coming soon'); break;
+        case 'comparison':showToast('Drug Comparison, coming soon'); break;
       }
     });
   });
@@ -364,7 +364,7 @@ function goSetup(mode, adaptive) {
   if (mode === 'weakspots') { launchWeakSpots(); return; }
 
   const titles = { standard:'📚 Standard Quiz', adaptive:'🧠 Adaptive Quiz', timed:'⚡ Timed Quiz', review:'🔁 Spaced Review', terms:'📖 Medical Terms Quiz' };
-  const descs  = { standard:'Mixed difficulty — all question types', adaptive:'Harder questions on drugs you know well', timed:'30 seconds per question — think fast', review:'Drugs due based on your performance', terms:'Test your medical terminology' };
+  const descs  = { standard:'Mixed difficulty: all question types', adaptive:'Harder questions on drugs you know well', timed:'30 seconds per question, think fast', review:'Drugs due based on your performance', terms:'Test your medical terminology' };
   const showScope = !['terms','review'].includes(mode);
 
   document.getElementById('quizTabContent').innerHTML = `
@@ -386,8 +386,8 @@ function goSetup(mode, adaptive) {
     <div class="og">
       <span class="og-lbl">Format</span>
       <div class="mode-grid">
-        <div class="mode-card on" onclick="selFmt('mc',this)"><div class="mode-ico">🎯</div><div class="mode-name">Multiple Choice</div><div class="mode-desc">4 options — auto-marked</div></div>
-        <div class="mode-card" onclick="selFmt('fc',this)"><div class="mode-ico">🃏</div><div class="mode-name">Flashcard</div><div class="mode-desc">Tap to flip — self-mark</div></div>
+        <div class="mode-card on" onclick="selFmt('mc',this)"><div class="mode-ico">🎯</div><div class="mode-name">Multiple Choice</div><div class="mode-desc">4 options, auto-marked</div></div>
+        <div class="mode-card" onclick="selFmt('fc',this)"><div class="mode-ico">🃏</div><div class="mode-name">Flashcard</div><div class="mode-desc">Tap to flip, self-mark</div></div>
       </div>
     </div>
     <button class="btn-pri" onclick="launchFromSetup()">Start Quiz</button>`;
@@ -436,8 +436,8 @@ function selectCat(name) {
     <div class="og">
       <span class="og-lbl">Format</span>
       <div class="mode-grid">
-        <div class="mode-card on" onclick="selFmt('mc',this)"><div class="mode-ico">🎯</div><div class="mode-name">Multiple Choice</div><div class="mode-desc">4 options — auto-marked</div></div>
-        <div class="mode-card" onclick="selFmt('fc',this)"><div class="mode-ico">🃏</div><div class="mode-name">Flashcard</div><div class="mode-desc">Tap to flip — self-mark</div></div>
+        <div class="mode-card on" onclick="selFmt('mc',this)"><div class="mode-ico">🎯</div><div class="mode-name">Multiple Choice</div><div class="mode-desc">4 options, auto-marked</div></div>
+        <div class="mode-card" onclick="selFmt('fc',this)"><div class="mode-ico">🃏</div><div class="mode-name">Flashcard</div><div class="mode-desc">Tap to flip, self-mark</div></div>
       </div>
     </div>
     <button class="btn-pri" onclick="launchFromSetup()">Start Quiz</button>`;
@@ -480,13 +480,13 @@ function launchFromSetup() {
 
 function launchWeakSpots() {
   const drugs = (G.recentWrong||[]).map(id => MEDS.find(m => m.id === id)).filter(Boolean);
-  if (!drugs.length) { showToast('No weak spots yet — keep quizzing!'); return; }
+  if (!drugs.length) { showToast('No weak spots yet, keep quizzing!'); return; }
   QZ.fmt = 'mc';
   launch(makeDrugQs(drugs, 10, false), false, false, false);
 }
 
 function startDaily() {
-  if (isDailyDone()) { showToast('Already done today — come back tomorrow!'); return; }
+  if (isDailyDone()) { showToast('Already done today, come back tomorrow!'); return; }
   QZ.fmt = 'mc';
   QZ.mode = 'daily';
   launch(makeDailyQs(), false, false, true);
@@ -775,7 +775,7 @@ function showResults() {
   document.getElementById('resTotal').textContent   = total;
   document.getElementById('resPct').textContent     = pct+'%';
   const xpMsg = `⚡ +${totalXP} XP earned${bonus>0?' (incl. +'+bonus+' daily bonus!)':''}`;
-  document.getElementById('xpEarnedBtn').textContent = xpMsg+' — tap to see progress';
+  document.getElementById('xpEarnedBtn').textContent = xpMsg+', tap to see progress';
   // Flashcard daily cap notice — only on flashcard quizzes once the cap is hit
   const capMsg = document.getElementById('resCapMsg');
   if (capMsg) {

@@ -28,7 +28,7 @@
       <p>The developer accepts no responsibility for clinical decisions made on the basis of information contained in this app.</p>
       <p style="font-size:12px;color:var(--text3);margin-top:4px">© Keith O'Reilly 2026. All rights reserved.</p>
     </div>
-    <button class="modal-btn" onclick="dismissDisclaimer()">I understand — Continue</button>
+    <button class="modal-btn" onclick="dismissDisclaimer()">I understand, Continue</button>
   </div>
 </div>
 
@@ -42,21 +42,21 @@
       <div class="onb-panel active" data-panel="0">
         <div class="onb-icon">🚑</div>
         <div class="onb-title">Welcome to Aireva Medic</div>
-        <div class="onb-text">Your study companion for Irish paramedic students. Practise OSCE scenarios, test yourself with quizzes, and master the drugs, doses and scopes — all in one place.</div>
+        <div class="onb-text">Your study companion for Irish paramedic students. Practise OSCE scenarios, test yourself with quizzes, and master the drugs, doses and scopes, all in one place.</div>
       </div>
 
       <!-- Panel 2: OSCE scenarios -->
       <div class="onb-panel" data-panel="1">
         <div class="onb-icon">🏥</div>
         <div class="onb-title">Practise OSCE scenarios</div>
-        <div class="onb-text">Generate a fresh OSCE station any time — a realistic patient with a full clinical picture, different every run. Run it solo or as a group, then reveal the diagnosis and Paramedic-scope management for the debrief.</div>
+        <div class="onb-text">Generate a fresh OSCE station any time: a realistic patient with a full clinical picture, different every run. Run it solo or as a group, then reveal the diagnosis and Paramedic-scope management for the debrief.</div>
       </div>
 
       <!-- Panel 3: Learn smarter -->
       <div class="onb-panel" data-panel="2">
         <div class="onb-icon">🧠</div>
         <div class="onb-title">Built to help you retain</div>
-        <div class="onb-text">Test yourself in Quiz mode — and the app makes every session smarter:</div>
+        <div class="onb-text">Test yourself in Quiz mode, and the app makes every session smarter:</div>
         <div class="onb-bullets">
           <div class="onb-bullet onb-bullet-tap" onclick="showOnbTip('spaced')">
             <div class="onb-bullet-row"><span class="onb-bullet-label">🔁 Spaced repetition</span><span class="onb-bullet-hint">Tap to learn more</span></div>
@@ -71,7 +71,7 @@
           <div class="onb-bullet onb-bullet-tap" onclick="showOnbTip('daily')">
             <div class="onb-bullet-row"><span class="onb-bullet-label">📅 Daily Challenge</span><span class="onb-bullet-hint">Tap to learn more</span></div>
             <span class="onb-bullet-desc">Five questions every day to stay sharp</span>
-            <div class="onb-tip" id="tip-daily">A short daily quiz that earns you bonus XP. Everyone gets the same questions each day. Complete it to build your streak — miss a day and the streak resets.</div>
+            <div class="onb-tip" id="tip-daily">A short daily quiz that earns you bonus XP. Everyone gets the same questions each day. Complete it to build your streak, miss a day and the streak resets.</div>
           </div>
         </div>
       </div>
@@ -80,7 +80,7 @@
       <div class="onb-panel" data-panel="3">
         <div class="onb-icon">📈</div>
         <div class="onb-title">Track your mastery</div>
-        <div class="onb-text">Earn XP, build streaks and watch every drug progress from Novice to Mastered. Over 700 questions across drugs and medical terms — all in one place.</div>
+        <div class="onb-text">Earn XP, build streaks and watch every drug progress from Novice to Mastered. Over 700 questions across drugs and medical terms, all in one place.</div>
       </div>
     </div>
 
@@ -190,7 +190,7 @@
   </div>
 </div>
 
-<div class="offline-bar" id="offlineBar">⚠️ No internet — running offline</div>
+<div class="offline-bar" id="offlineBar">⚠️ No internet, running offline</div>
 
 <div class="status-bar-spacer"></div>
 <header class="hdr">
@@ -255,7 +255,7 @@
     <div class="dotd-tap">Tap to open →</div>
   </div>
 
-  <div class="home-disclaimer-link" onclick="document.getElementById('disclaimerModal').style.display='flex'">⚠️ Disclaimer — learning tool only</div>
+  <div class="home-disclaimer-link" onclick="document.getElementById('disclaimerModal').style.display='flex'">⚠️ Disclaimer: learning tool only</div>
 </div>
 
 <!-- REFERENCE -->
@@ -351,8 +351,8 @@
         <div class="res-stat"><div class="res-num" id="resTotal">0</div><div class="res-lbl">Questions</div></div>
         <div class="res-stat"><div class="res-num" id="resPct">0%</div><div class="res-lbl">Score</div></div>
       </div>
-      <button class="xp-earned-btn" id="xpEarnedBtn" onclick="goProgress()">⚡ +0 XP — tap to see progress</button>
-      <div class="res-cap-msg" id="resCapMsg" style="display:none">🃏 Daily flashcard XP cap reached (100 XP) — switch to a quiz to keep earning XP today.</div>
+      <button class="xp-earned-btn" id="xpEarnedBtn" onclick="goProgress()">⚡ +0 XP, tap to see progress</button>
+      <div class="res-cap-msg" id="resCapMsg" style="display:none">🃏 Daily flashcard XP cap reached (100 XP): switch to a quiz to keep earning XP today.</div>
       <div id="wrongBreakdown" style="display:none;margin-bottom:16px;text-align:left"></div>
       <div id="resIntroBtn" style="display:none">
         <button class="btn-pri" onclick="showPage('quiz',document.getElementById('btn-quiz'));scrollTop()" style="margin-bottom:10px">Start Studying →</button>
@@ -426,7 +426,7 @@
   </div>
   <!-- Activity Chart -->
   <div class="chart-card">
-    <div class="mc-title">Activity — Last 7 Days</div>
+    <div class="mc-title">Activity: Last 7 Days</div>
     <div class="chart-tabs">
       <button class="chart-tab on" onclick="setChartMetric('questions',this)">Questions</button>
       <button class="chart-tab" onclick="setChartMetric('accuracy',this)">Accuracy %</button>
