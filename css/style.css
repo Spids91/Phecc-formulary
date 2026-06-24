@@ -224,19 +224,26 @@ ul { list-style: none; }
 }
 .nb {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 4px; color: rgba(255,255,255,.45);
+  justify-content: center; gap: 4px; color: rgba(255,255,255,.5);
   font-size: 9px; font-weight: 600; letter-spacing: .2px;
   transition: all var(--dur-fast) var(--ease);
-  padding: 10px 10px; position: relative; -webkit-tap-highlight-color: transparent;
-  border-radius: 22px;
+  padding: 8px 4px; position: relative; -webkit-tap-highlight-color: transparent;
+  border-radius: var(--r-pill);
 }
 .nb.active {
   color: #fff;
-  background: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.14);
 }
 .nb svg { width: 20px; height: 20px; stroke-width: 1.7; transition: stroke-width var(--dur-fast) var(--ease); }
-.nb.active svg { stroke-width: 2.3; }
+.nb.active svg { stroke-width: 2.2; }
 .nb.active::after { display: none; }
+
+/* Practice tab — amber target icon marks it as the feature to try.
+   The label and selection pill behave exactly like the other tabs;
+   only the icon stroke is amber, persistent whether or not selected. */
+.nb-quiz svg { stroke: #F59E0B; stroke-width: 2; }
+.nb-quiz.active svg { stroke: #F59E0B; stroke-width: 2.3; }
+.nb-quiz svg circle[fill] { fill: #F59E0B; }
 
 /* ── PAGES ───────────────────────────────────────────────────────────── */
 .page {
@@ -1445,40 +1452,6 @@ ul { list-style: none; }
 }
 .confirm-ok:active { opacity: .85; }
 .confirm-ok.danger { background: var(--error); }
-
-/* ── QUIZ NAV BUTTON — raised hero button ─────────────────────────────────── */
-.nb.nb-quiz {
-  position: relative;
-  align-self: center;
-  margin-top: -22px;
-  background: linear-gradient(145deg, #3B82F6 0%, #2563EB 55%, #1D4ED8 100%);
-  border-radius: 50%;
-  width: 52px; height: 52px;
-  box-shadow: 0 6px 18px rgba(37,99,235,.45), inset 0 1px 0 rgba(255,255,255,.25);
-  color: #fff !important;
-  flex: 0 0 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  font-size: 0;
-  line-height: 0;
-}
-.nb.nb-quiz svg { width: 24px; height: 24px; stroke-width: 2; display: block; flex-shrink: 0; }
-.nb.nb-quiz::after { display: none; }
-.nb.nb-quiz.active { background: var(--primary-dark); }
-/* Quiz label — positioned to sit level with other nav labels outside the bubble */
-.nb.nb-quiz::before {
-  content: 'Practice';
-  position: absolute;
-  bottom: -15px;
-  left: 50%; transform: translateX(-50%);
-  font-size: 9px; font-weight: 600; letter-spacing: .2px;
-  color: rgba(255,255,255,.55);
-  white-space: nowrap;
-  line-height: 1;
-}
-.nb.nb-quiz.active::before { color: #fff; }
 
 /* ── ONBOARDING TAPPABLE BULLETS ─────────────────────────────────────────── */
 .onb-bullet-tap { cursor: pointer; transition: background var(--dur-fast) var(--ease); }
