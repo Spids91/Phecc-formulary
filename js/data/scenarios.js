@@ -157,11 +157,36 @@ const SCEN_LOCATIONS = [
 //         drugs: [ { name, paramedic:'IM dose...', ap:'IV dose...'(optional) } ] }
 //     'paramedic' shows normally; 'ap' (if present) renders in an amber AP-scope bubble.
 //
+// PHECC CPG section taxonomy — the official guideline sections, used as the
+// `category` for each presentation so a future picker can group/filter by them.
+// Order matches the CPG. (Section 1 "Principles of General Care" and the final
+// "Patient Disposition" section are intentionally omitted — they are not
+// presentation categories.) Adding a new presentation = give it a `category`
+// from this list (or extend the list if a needed section is missing).
+const PHECC_SECTIONS = [
+  'Airway and Breathing',
+  'Cardiac',
+  'Circulation',
+  'Medical',
+  'Neurological',
+  'Behavioural / Mental Health Emergencies',
+  'Trauma',
+  'Environmental',
+  'Toxicology',
+  'Infectious',
+  'Maternal',
+  'Paediatric',
+  'Resuscitation',
+  'Palliative Care',
+  'Operations',
+];
+
 // ⚠️ Anaphylaxis content below is FIRST-DRAFT PLACEHOLDER for engine demonstration.
 const PRESENTATIONS = [
   {
     id: 'anaphylaxis',
     name: 'Anaphylaxis',
+    category: 'Toxicology',
     demographics: { minAge: 1, maxAge: 90, sex: 'any' },
     variants: [
       { cause:'bee sting', conscious:true,
@@ -268,6 +293,7 @@ const PRESENTATIONS = [
   {
     id: 'hypoglycaemia',
     name: 'Hypoglycaemia',
+    category: 'Medical',
     demographics: { minAge: 1, maxAge: 90, sex: 'any' },
     variants: [
       // Conscious level is the key decision fork here (gel vs glucagon). The engine
@@ -371,6 +397,7 @@ const PRESENTATIONS = [
   {
     id: 'acs',
     name: 'Acute Coronary Syndrome',
+    category: 'Cardiac',
     demographics: { minAge: 35, maxAge: 90, sex: 'any' },
     // ECG rhythm field (first presentation to use it). Descriptive labels — a real
     // 12-lead would be handed to candidates in the room; here the student reads the
@@ -482,6 +509,7 @@ const PRESENTATIONS = [
   {
     id: 'fbao',
     name: 'Foreign Body Airway Obstruction',
+    category: 'Airway and Breathing',
     demographics: { minAge: 16, maxAge: 90, sex: 'any' },
     variants: [
       // SEVERE + CONSCIOUS → back blows / abdominal thrusts.
