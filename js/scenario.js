@@ -38,18 +38,36 @@ function scenMaxPct(age) {
 //   dir 'down' → drop below the floor by the same proportion
 // Severity is randomised 0.5–1.0 of the requested intensity so scenarios vary
 // moderate→severe and never repeat the same number.
+// A deviation may carry an optional `cap` (for 'up') or `floor` (for 'down') to bound
+// the result at a clinically plausible limit. Each may be:
+//   • a NUMBER  → a flat ceiling/floor for all ages, or
+//   • an ARRAY of {age, val} bands → an AGE-SCALED limit (e.g. a tachypnoeic infant
+//     can breathe faster than an adult, so RR caps higher for the young). The band whose
+//     `age` is the first >= the patient's age is used (same convention as DEV_PCT_BANDS).
+// Resolves to a number via resolveLimit().
+function resolveLimit(limit, age) {
+  if (limit == null) return null;
+  if (typeof limit === 'number') return limit;
+  const b = limit.find(x => age <= x.age) || limit[limit.length - 1];
+  return b ? b.val : null;
+}
 function applyRelative(range, dev, age) {
   const [lo, hi] = range;
   const maxPct = scenMaxPct(age) / 100;
   const severity = 0.5 + Math.random() * 0.5;        // 0.5–1.0
   const shiftFrac = maxPct * dev.intensity * severity;
   if (dev.dir === 'up') {
-    const target = Math.round(hi * (1 + shiftFrac));
-    // sit somewhere between just-over-ceiling and the target, for spread
-    return _ri(hi + 1, Math.max(hi + 2, target));
+    const cap = resolveLimit(dev.cap, age);
+    let target = Math.round(hi * (1 + shiftFrac));
+    if (cap != null) target = Math.min(target, cap);            // clinical ceiling
+    const top = Math.max(hi + 2, target);
+    return _ri(hi + 1, cap != null ? Math.min(top, cap) : top);
   } else {
-    const target = Math.round(lo * (1 - shiftFrac));
-    return _ri(Math.min(lo - 2, target), lo - 1);
+    const floor = resolveLimit(dev.floor, age);
+    let target = Math.round(lo * (1 - shiftFrac));
+    if (floor != null) target = Math.max(target, floor);        // clinical floor
+    const bot = Math.min(lo - 2, target);
+    return _ri(floor != null ? Math.max(bot, floor) : bot, lo - 1);
   }
 }
 
@@ -58,15 +76,18 @@ function generateScenario(presId) {
   const pres = presId ? PRESENTATIONS.find(p => p.id === presId) : _pickPresentation();
   if (!pres) return null;
 
-  // 1. Patient within demographic constraints.
-  const lo = pres.demographics.minAge, hi = pres.demographics.maxAge;
+  // 1. Narrative variant (the cause/story). Picked first so it can constrain age.
+  const variant = _pick(pres.variants);
+
+  // 2. Patient within demographic constraints. A variant may raise the minimum age
+  //    via `variant.minAge` (e.g. a Type 2 diabetic should not be a toddler); the
+  //    presentation floor still applies as the baseline.
+  const lo = Math.max(pres.demographics.minAge, variant.minAge || 0);
+  const hi = pres.demographics.maxAge;
   let age;
   if (lo < 2 && Math.random() < 0.25) age = _pick([0, 0.5, 1]);     // occasional infant
   else age = _ri(Math.max(1, Math.ceil(lo)), Math.floor(hi));
   const sex = pres.demographics.sex === 'any' ? _pick(['male', 'female']) : pres.demographics.sex;
-
-  // 2. Narrative variant (the cause/story).
-  const variant = _pick(pres.variants);
 
   // 3. Vitals. Relative vitals (hr/rr/bpSys/bpDia) use age-scaled % shifts; absolute
   //    vitals (spo2/temp/bgl) use direct target ranges; anything omitted stays normal.
@@ -77,7 +98,11 @@ function generateScenario(presId) {
   // catastrophic large-burn-plus-inhalation case). Absent override = unchanged.
   const d = variant.vitalsOverride || pres.deviations || {};
   const hr  = d.hr  ? applyRelative(band.hr, d.hr, age) : _ri(band.hr[0], band.hr[1]);
-  const rr  = d.rr  ? applyRelative(band.rr, d.rr, age) : _ri(band.rr[0], band.rr[1]);
+  // RR: usually a relative deviation, but a variant may give an absolute [lo,hi] range
+  // (like spo2/bgl) for precise control, e.g. opioid respiratory depression RR [6,10].
+  const rr  = Array.isArray(d.rr) ? _ri(d.rr[0], d.rr[1])
+            : d.rr ? applyRelative(band.rr, d.rr, age)
+            : _ri(band.rr[0], band.rr[1]);
   const sys = d.bpSys ? applyRelative([band.bp[0], band.bp[1]], d.bpSys, age) : _ri(band.bp[0], band.bp[1]);
   const dia = d.bpDia ? applyRelative([band.bp[2], band.bp[3]], d.bpDia, age) : _ri(band.bp[2], band.bp[3]);
   // SpO2: most presentations use a flat absolute range [min,max]. A presentation
@@ -174,6 +199,12 @@ function generateScenario(presId) {
   // mention "diabetic". So SAMPLE/OPQRST default to "Unknown" — EXCEPT Events Leading Up,
   // which can carry the witnessed-collapse framing (a bystander plausibly saw them go
   // down even if they know nothing else about them).
+  //
+  // EXCEPTION: a variant may explicitly supply `sample` fields for an unconscious patient
+  // to model a family-present-at-home scenario, where a relative can give a brief (often
+  // vague) history. Any field the variant provides is used; anything omitted stays Unknown.
+  // This keeps the BGL-check teaching intact (history may be vague/absent) while allowing
+  // realistic variation between "found alone, nothing known" and "family gave a history".
   const UNK = 'Unknown, no reliable history available.';
   const UNK_SHORT = 'Unknown';
   const sample = conscious ? {
@@ -183,11 +214,11 @@ function generateScenario(presId) {
     pmh:         vs.pmh         || ps.pmh,
     lastIntake:  lastIntake,
   } : {
-    symptoms:    UNK,
-    allergies:   UNK_SHORT,
-    medications: UNK_SHORT,
-    pmh:         UNK_SHORT,
-    lastIntake:  lastIntake,   // already the unresponsive message
+    symptoms:    vs.symptoms    || UNK,
+    allergies:   variant.allergies || UNK_SHORT,
+    medications: vs.medications || UNK_SHORT,
+    pmh:         vs.pmh         || UNK_SHORT,
+    lastIntake:  vs.lastIntake || lastIntake,   // explicit > unresponsive default
   };
   // OPQRST: also Unknown for unconscious (can't self-report pain/onset/etc).
   // OPQRST. Non-timing fields (provocation/quality/radiates/severity) are shared from
@@ -350,7 +381,10 @@ function renderScenarioCard(sc) {
       const open = rv.style.display !== 'none';
       rv.style.display = open ? 'none' : 'block';
       rb.textContent = open ? 'Reveal Diagnosis & Management' : 'Hide Diagnosis & Management';
-      // Land the Diagnosis bubble near the top of the screen (not just barely in view).
+      // Land the Diagnosis bubble just below the sticky header. The header offset
+      // lives in CSS as `.scen-reveal { scroll-margin-top: --sbh + --hdr-h + 12px }`,
+      // which scrollIntoView respects natively (so it clears the status bar + header
+      // bar on both web and the iOS wrapper, where --sbh is injected at runtime).
       if (!open) {
         requestAnimationFrame(() => rv.scrollIntoView({ behavior: 'smooth', block: 'start' }));
       }

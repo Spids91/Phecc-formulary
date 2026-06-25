@@ -1,4 +1,4 @@
-// ─── SETTINGS.JS v0.9.4 ───────────────────────────────────────────────────────
+// ─── SETTINGS.JS v0.9.5 ───────────────────────────────────────────────────────
 
 function openSettings() {
   document.getElementById('settingsPanel').classList.add('open');
@@ -93,6 +93,8 @@ const LEGAL = {
   patches: {
     title: 'Patch Notes',
     body: `
+      <h2>v0.9.5</h2>
+      <p>New presentation: Poisoning and Overdose, covering opioid, alcohol and other ingestions with the full PHECC management pathway. Poisoning patients now have realistic, case-specific histories: what they took, when, and their last food and drink, with the assessment questions answered the way a real patient would answer them. Respiratory rates in serious scenarios are now more clinically realistic, scaling correctly with the patient's age so a distressed infant and a distressed adult read differently. The diagnosis reveal now scrolls to sit neatly below the header instead of tucking underneath it. Plus smaller realism and polish fixes throughout.</p>
       <h2>v0.9.4</h2>
       <p>Scenarios are now patient-specific: each patient has their own medications, past history and symptoms rather than a generic summary. Medications use real brand names to encourage looking them up in Common Medications. New presentations: Burns and Stroke. Foreign Body Airway Obstruction is now conscious-only, keeping practice on the choking pathway. Scenarios no longer repeat the same presentation twice in a row. Stroke now models witnessed versus unwitnessed onset and last-known-well time. Chest pain, breathing and stroke scenarios reworded so the findings no longer give away the diagnosis. Many wording and realism fixes throughout.</p>
       <h2>v0.9.3</h2>
@@ -123,12 +125,65 @@ const LEGAL = {
   }
 };
 
+// Turn the flat <h2>version</h2><p>notes</p> patch list into an accordion:
+// each version becomes a tappable header with its notes collapsed beneath it.
+// The first (latest) version is expanded by default. Source HTML stays simple
+// (just add an <h2>/<p> pair for a new release); the accordion is applied here.
+function buildPatchAccordion(html) {
+  // split into [version, notes] pairs by the <h2> markers
+  const parts = html.split(/<h2>/).map(s => s.trim()).filter(Boolean);
+  return parts.map((part, i) => {
+    const m = part.match(/^(.*?)<\/h2>\s*([\s\S]*)$/);
+    if (!m) return '';
+    const ver = m[1].trim();
+    const notes = m[2].trim();
+    const open = i === 0 ? ' open' : '';
+    return `<div class="patch-item${open}">
+      <button class="patch-head" onclick="togglePatch(this)" aria-expanded="${i === 0}">
+        <span class="patch-ver">${ver}</span>
+        <span class="patch-chevron">⌄</span>
+      </button>
+      <div class="patch-notes">${notes}</div>
+    </div>`;
+  }).join('');
+}
+
+function togglePatch(btn) {
+  const item = btn.closest('.patch-item');
+  const wasOpen = item.classList.contains('open');
+  // True accordion: close every item first, then open the tapped one (if it
+  // wasn't already open). Tapping an open item just closes it.
+  document.querySelectorAll('.patch-item.open').forEach(el => {
+    el.classList.remove('open');
+    const h = el.querySelector('.patch-head');
+    if (h) h.setAttribute('aria-expanded', 'false');
+  });
+  if (!wasOpen) {
+    item.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    // Smooth-scroll the opened item to the top of the scroll area, matching the
+    // scenario reveal behaviour. Scroll the modal body, not the whole window.
+    // Use rect-difference (robust to the container's padding / offset parent).
+    requestAnimationFrame(() => {
+      const scroller = item.closest('#legalBody');
+      if (scroller) {
+        const delta = item.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+        scroller.scrollTo({ top: scroller.scrollTop + delta, behavior: 'smooth' });
+      } else {
+        item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+  haptic();
+}
+
 function openLegal(key) {
   const doc = LEGAL[key];
   if (!doc) return;
   document.getElementById('legalTitle').textContent = doc.title;
   const body = document.getElementById('legalBody');
-  body.innerHTML = doc.body;
+  // Patch notes render as an accordion; all other docs render as-is.
+  body.innerHTML = key === 'patches' ? buildPatchAccordion(doc.body) : doc.body;
   body.scrollTop = 0;  // always start at top
   const modal = document.getElementById('legalModal');
   modal.classList.add('open');
