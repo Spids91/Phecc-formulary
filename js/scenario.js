@@ -9,6 +9,20 @@ function _ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; } 
 function _rf(lo, hi) { return Math.round((Math.random() * (hi - lo) + lo) * 10) / 10; } // 1-dp float
 function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
+// Remembers the last presentation shown so the random picker never serves the
+// same presentation twice in a row. True random feels "broken" to users because
+// it clumps (with 7 presentations, ~1 in 7 picks repeats the previous one); this
+// guard removes that perceived repetition while keeping selection otherwise random.
+// Only applies to random selection; an explicitly requested presId is unaffected.
+let _lastPresId = null;
+function _pickPresentation() {
+  if (PRESENTATIONS.length <= 1) return PRESENTATIONS[0];   // can't avoid a repeat with one option
+  let p;
+  do { p = _pick(PRESENTATIONS); } while (p.id === _lastPresId);
+  _lastPresId = p.id;
+  return p;
+}
+
 // First vital age-band whose age >= patient age.
 function scenVitalBand(age) {
   return SCEN_VITALS.find(b => age <= b.age) || SCEN_VITALS[SCEN_VITALS.length - 1];
@@ -41,7 +55,7 @@ function applyRelative(range, dev, age) {
 
 // ── CORE GENERATOR ───────────────────────────────────────────────────────────────
 function generateScenario(presId) {
-  const pres = presId ? PRESENTATIONS.find(p => p.id === presId) : _pick(PRESENTATIONS);
+  const pres = presId ? PRESENTATIONS.find(p => p.id === presId) : _pickPresentation();
   if (!pres) return null;
 
   // 1. Patient within demographic constraints.
@@ -57,7 +71,11 @@ function generateScenario(presId) {
   // 3. Vitals. Relative vitals (hr/rr/bpSys/bpDia) use age-scaled % shifts; absolute
   //    vitals (spo2/temp/bgl) use direct target ranges; anything omitted stays normal.
   const band = scenVitalBand(age);
-  const d = pres.deviations || {};
+  // Deviations are normally presentation-level. A single variant can override them
+  // with its own `vitalsOverride` object (same shape as deviations) so one outlier
+  // variant can read distinctly sicker/healthier than its siblings (e.g. a
+  // catastrophic large-burn-plus-inhalation case). Absent override = unchanged.
+  const d = variant.vitalsOverride || pres.deviations || {};
   const hr  = d.hr  ? applyRelative(band.hr, d.hr, age) : _ri(band.hr[0], band.hr[1]);
   const rr  = d.rr  ? applyRelative(band.rr, d.rr, age) : _ri(band.rr[0], band.rr[1]);
   const sys = d.bpSys ? applyRelative([band.bp[0], band.bp[1]], d.bpSys, age) : _ri(band.bp[0], band.bp[1]);
@@ -87,7 +105,17 @@ function generateScenario(presId) {
                  : age <= 15 ? `${age}-year-old` : `${age}-year-old`;
   const personWord = age <= 15 ? (sex === 'male' ? 'boy' : 'girl')
                                : (sex === 'male' ? 'man' : 'woman');
-  const location = _pick(SCEN_LOCATIONS);  // {name, found}
+  // Location pick. A variant can declare `witness:'witnessed'|'unwitnessed'` to keep
+  // the scene and the history consistent (general capability, any presentation can use it):
+  //   'unwitnessed' → patient is alone with no witness to onset, so pick a location where
+  //                   that's plausible (solo:true), and last-known-well becomes "unknown".
+  //   'witnessed'   → someone was present, so avoid solo-only spots; the variant supplies
+  //                   a real last-known-well via its sample.lastIntake.
+  // No witness field = original behaviour (pick from all locations).
+  let locPool = SCEN_LOCATIONS;
+  if (variant.witness === 'unwitnessed')      locPool = SCEN_LOCATIONS.filter(l => l.solo);
+  else if (variant.witness === 'witnessed')   locPool = SCEN_LOCATIONS.filter(l => !l.solo || l.found);
+  const location = _pick(locPool.length ? locPool : SCEN_LOCATIONS);  // {name, found, solo}
   const dispatch = variant.dispatch
     .replace('{location}', location.name)
     .replace('a PATIENT', `a ${ageLabel} ${personWord}`)
@@ -117,7 +145,29 @@ function generateScenario(presId) {
 
   // Last oral intake: an unresponsive patient can't tell you — Unknown is the honest,
   // realistic value rather than fabricating a history.
-  const lastIntake = conscious ? pres.sample.lastIntake : 'Unknown, patient unresponsive, no reliable history.';
+  // A variant can supply its own `sample` object (patient-specific medications, PMH,
+  // symptoms, lastIntake) which overrides the presentation default field-by-field;
+  // anything the variant omits falls back to pres.sample. This lets each patient have
+  // a realistic, individual history (e.g. a stroke patient on a named anticoagulant)
+  // while presentations not yet migrated keep their shared default.
+  const vs = variant.sample || {};
+  const ps = pres.sample;
+  // Last-known-well wording carries the witness/reliability angle (distinct from the
+  // OPQRST clock). For a witnessed patient with an onsetWhen value, the clock time is
+  // derived from that single source (onsetWhen) so it can't drift from OPQRST Time.
+  // Unwitnessed → genuinely unknown (clinically important: often excludes the window).
+  let lastIntake;
+  if (!conscious) {
+    lastIntake = 'Unknown, patient unresponsive, no reliable history.';
+  } else if (variant.witness === 'unwitnessed') {
+    lastIntake = 'Unknown, the patient was found alone and the time of onset is unwitnessed.';
+  } else if (variant.witness === 'witnessed' && variant.onsetWhen) {
+    lastIntake = `A witness was present and saw them well ${variant.onsetWhen}.`;
+  } else if (variant.witness === 'witnessed' && variant.wakeUp) {
+    lastIntake = 'Was seen well last night before bed; woke with the symptoms, so the exact onset overnight is unknown.';
+  } else {
+    lastIntake = vs.lastIntake || ps.lastIntake;
+  }
 
   // For an UNCONSCIOUS patient, almost no reliable history is obtainable — the student's
   // learning is to assess (vitals/BGL), NOT to interrogate a bystander and hope they
@@ -127,10 +177,10 @@ function generateScenario(presId) {
   const UNK = 'Unknown, no reliable history available.';
   const UNK_SHORT = 'Unknown';
   const sample = conscious ? {
-    symptoms:    pres.sample.symptoms,
+    symptoms:    vs.symptoms    || ps.symptoms,
     allergies:   variant.allergies,
-    medications: pres.sample.medications,
-    pmh:         pres.sample.pmh,
+    medications: vs.medications || ps.medications,
+    pmh:         vs.pmh         || ps.pmh,
     lastIntake:  lastIntake,
   } : {
     symptoms:    UNK,
@@ -140,10 +190,44 @@ function generateScenario(presId) {
     lastIntake:  lastIntake,   // already the unresponsive message
   };
   // OPQRST: also Unknown for unconscious (can't self-report pain/onset/etc).
-  const opqrst = !pres.opqrst ? null : (conscious ? pres.opqrst : {
-    onset: UNK_SHORT, provocation: UNK_SHORT, quality: UNK_SHORT,
-    radiates: UNK_SHORT, severity: 'Unknown', time: UNK_SHORT,
-  });
+  // OPQRST. Non-timing fields (provocation/quality/radiates/severity) are shared from
+  // the presentation. The two TIMING fields (onset, time) are DERIVED per-variant from
+  // the witness type + an optional onsetWhen value, so they can never contradict the
+  // SAMPLE last-known-well (one source of truth) and each says something distinct:
+  //   onset = onset character (sudden + witnessed/not); time = WHEN it started (onset-
+  //   anchored, not duration, because the stroke window is measured from time of onset).
+  // onsetWhen lives on the variant and also feeds the witnessed lastIntake below.
+  function deriveTiming(v, base) {
+    if (!base) return base;
+    const when = v.onsetWhen;                 // e.g. 'about 40 minutes ago' (witnessed only)
+    let onset, time;
+    if (v.witness === 'unwitnessed') {
+      onset = 'Sudden onset, but not witnessed, the patient was found already affected.';
+      time  = 'Time of onset unknown; the patient was found already symptomatic.';
+    } else if (v.wakeUp) {                     // wake-up: witnessed-well last night, onset unobserved
+      onset = 'Symptoms present on waking, so the onset was not observed.';
+      time  = 'Last known well last night; the symptoms were already present on waking.';
+    } else if (when) {                         // witnessed with a known clock time
+      onset = 'Sudden onset, witnessed.';
+        time  = v.improving
+          ? `Symptoms started ${when} and have been improving since.`
+          : `Symptoms started ${when} and are ongoing.`;
+    } else {
+      return base;                            // no timing metadata → use shared fields unchanged
+    }
+    return { ...base, onset, time };
+  }
+  // OPQRST base = presentation default, with any per-variant opqrst merged over it
+  // field-by-field (lets painBased presentations like ACS give each variant its own
+  // pain story). deriveTiming then applies on top for presentations that use the
+  // witness/onsetWhen timing machinery (e.g. stroke); for others it's a no-op.
+  const opqrstBase = pres.opqrst ? { ...pres.opqrst, ...(variant.opqrst || {}) } : null;
+  const opqrst = !opqrstBase ? null : (conscious
+    ? deriveTiming(variant, opqrstBase)
+    : {
+        onset: UNK_SHORT, provocation: UNK_SHORT, quality: UNK_SHORT,
+        radiates: UNK_SHORT, severity: 'Unknown', time: UNK_SHORT,
+      });
 
   return { pres, variant, age, sex, band, dispatch, ecg, conscious, location,
            events, lastIntake, sample, opqrst, presentationText,
@@ -224,9 +308,13 @@ function renderScenarioCard(sc) {
   const isAdult = sc.age > 15;
   const drugLines = (p.reveal.drugs || []).map(dr => {
     const d = isAdult ? (dr.adult || dr) : (dr.paed || dr);
+    // paramedic route shown as the main line; ap route (if any) as the amber pill.
+    // Some drugs are AP-only (no paramedic route) — show just the name + AP pill,
+    // never leak "undefined".
+    const main = d.paramedic ? ` &mdash; ${d.paramedic}` : '';
     return `
     <li>
-      <strong>${dr.name}</strong> &mdash; ${d.paramedic}
+      <strong>${dr.name}</strong>${main}
       ${d.ap ? `<span class="scen-ap-pill">AP only: ${d.ap}</span>` : ''}
     </li>`;
   }).join('');
