@@ -4,10 +4,27 @@
 // then a tap-to-reveal panel anchors their debrief. No marking, no branching.
 // Data comes from js/data/scenarios.js (SCEN_VITALS + DEV_PCT_BANDS + PRESENTATIONS).
 
+// ── RANDOM SOURCE (seedable) ───────────────────────────────────────────────────
+// The engine draws ALL randomness through _rand(). By default _rand IS Math.random,
+// so normal "Generate" taps behave byte-for-byte as before. When a scenario is
+// generated WITH a seed (shared/loaded), _rand is swapped for a deterministic
+// Mulberry32 PRNG for the duration of that one generation, then restored. Same seed
+// + same presentation data => identical scenario, on any device. (Mulberry32 is the
+// same family already used for drug-of-the-day in home.js.)
+let _rand = Math.random;                       // live random source (default: real random)
+function _mulberry32(a) {                       // returns a seeded () => [0,1) function
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // ── HELPERS ──────────────────────────────────────────────────────────────────────
-function _ri(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }       // int in [lo,hi]
-function _rf(lo, hi) { return Math.round((Math.random() * (hi - lo) + lo) * 10) / 10; } // 1-dp float
-function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function _ri(lo, hi) { return Math.floor(_rand() * (hi - lo + 1)) + lo; }       // int in [lo,hi]
+function _rf(lo, hi) { return Math.round((_rand() * (hi - lo) + lo) * 10) / 10; } // 1-dp float
+function _pick(arr) { return arr[Math.floor(_rand() * arr.length)]; }
 
 // Remembers the last presentation shown so the random picker never serves the
 // same presentation twice in a row. True random feels "broken" to users because
@@ -54,7 +71,7 @@ function resolveLimit(limit, age) {
 function applyRelative(range, dev, age) {
   const [lo, hi] = range;
   const maxPct = scenMaxPct(age) / 100;
-  const severity = 0.5 + Math.random() * 0.5;        // 0.5–1.0
+  const severity = 0.5 + _rand() * 0.5;        // 0.5–1.0
   const shiftFrac = maxPct * dev.intensity * severity;
   if (dev.dir === 'up') {
     const cap = resolveLimit(dev.cap, age);
@@ -71,21 +88,144 @@ function applyRelative(range, dev, age) {
   }
 }
 
+// ── SEED CODES ─────────────────────────────────────────────────────────────────
+// A scenario is reproducible from a compact code that encodes (a) the presentation
+// index and (b) a 32-bit RNG seed. Same code => same presentation + identical RNG
+// draws => identical scenario, provided the engine and that presentation's data are
+// unchanged. (Editing a presentation later may shift what an old code produces; this
+// is for "share a station with a classmate now", not a permanent archival id.)
+//
+// Wire format: a single integer = presIndex * 2^32 + seed, base32-encoded (Crockford,
+// no I/L/O/U to avoid misreads), grouped XXXX-XXX for readability. presIndex is the
+// index into PRESENTATIONS; if a future data change reorders them, fall back to random.
+const _SEED_ALPHA = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';   // Crockford base32
+function _encodeSeed(presIndex, seed, cohort) {
+  // Combine into one big integer using BigInt (presIndex up to a few hundred, seed 32-bit).
+  // A cohort bit sits above presIndex (bit 48): 0 = adult (default, so existing adult
+  // codes are unchanged), 1 = paeds. Older codes decode as adult automatically.
+  const cohortBit = cohort === 'paeds' ? 1n : 0n;
+  let n = (cohortBit << 48n) | (BigInt(presIndex) << 32n) | BigInt(seed >>> 0);
+  let out = '';
+  if (n === 0n) out = '0';
+  while (n > 0n) { out = _SEED_ALPHA[Number(n & 31n)] + out; n >>= 5n; }
+  // Group as XXXX-XXX… for legibility (4 then 3, padded enough for our range).
+  out = out.padStart(7, '0');
+  return out.slice(0, -3) + '-' + out.slice(-3);
+}
+function _decodeSeed(code) {
+  const clean = String(code).toUpperCase().replace(/[^0-9A-Z]/g, '')
+    .replace(/I/g, '1').replace(/L/g, '1').replace(/O/g, '0').replace(/U/g, 'V');
+  if (!clean) return null;
+  let n = 0n;
+  for (const ch of clean) {
+    const v = _SEED_ALPHA.indexOf(ch);
+    if (v < 0) return null;            // invalid character
+    n = (n << 5n) | BigInt(v);
+  }
+  const seed = Number(n & 0xFFFFFFFFn);
+  const presIndex = Number((n >> 32n) & 0xFFFFn);
+  const cohort = ((n >> 48n) & 1n) === 1n ? 'paeds' : 'adult';
+  if (presIndex < 0 || presIndex >= PRESENTATIONS.length) return null;  // stale/invalid
+  return { presIndex, seed, cohort };
+}
+
 // ── CORE GENERATOR ───────────────────────────────────────────────────────────────
-function generateScenario(presId) {
-  const pres = presId ? PRESENTATIONS.find(p => p.id === presId) : _pickPresentation();
+// generateScenario(presId?, seedCode?)
+//   • no args            → random presentation, random scenario (as before), but a
+//                          shareable `seedCode` is still captured onto the result.
+//   • presId only        → that presentation, random scenario (as before) + seedCode.
+//   • seedCode (2nd arg) → fully deterministic: presentation + scenario reproduced
+//                          from the code. Overrides presId.
+function generateScenario(presId, seedCode, cohort) {
+  // Resolve a seed if a code was supplied. On any decode failure, fall through to
+  // normal random generation (never throw on a bad/old code).
+  let _seed = null, _presIndexFromCode = null, _cohortFromCode = null;
+  if (seedCode) {
+    const dec = _decodeSeed(seedCode);
+    if (dec) { _seed = dec.seed >>> 0; _presIndexFromCode = dec.presIndex; _cohortFromCode = dec.cohort; }
+  }
+  // A code's cohort wins (so a shared paeds code reproduces as paeds); otherwise use the
+  // caller's cohort; default adult.
+  const _cohort = _cohortFromCode || cohort || 'adult';
+  // If no seed came from a code, mint a fresh one so EVERY scenario is shareable.
+  if (_seed == null) _seed = (Math.floor(Math.random() * 0xFFFFFFFF)) >>> 0;
+
+  // Activate the deterministic RNG for this generation, then always restore.
+  const _prevRand = _rand;
+  _rand = _mulberry32(_seed);
+  // _lastPresId would make a seeded pick depend on prior history (breaking
+  // reproducibility); neutralise it for the seeded draw and restore after.
+  const _prevLast = _lastPresId;
+  _lastPresId = null;
+  try {
+    return _generateScenarioInner(presId, _seed, _presIndexFromCode, _cohort);
+  } finally {
+    _rand = _prevRand;
+    _lastPresId = _prevLast;
+  }
+}
+
+// Is a presentation playable in the given cohort? Paeds = has at least one variant that
+// can run at age <= 12; adult = at least one variant that can run at age >= 16. A variant's
+// floor is max(presentation.minAge, variant.minAge); its ceiling is min(pres.maxAge,
+// variant.maxAge). This is what lets an expanded presentation (adult variants pinned
+// minAge:16, paed variants maxAge:12) appear in BOTH cohorts but show the right variants.
+function _variantPlayable(pres, variant, cohort) {
+  const lo = Math.max(pres.demographics.minAge, variant.minAge || 0);
+  const hi = Math.min(pres.demographics.maxAge, variant.maxAge || Infinity);
+  if (cohort === 'paeds') return lo <= 15;     // a variant usable at or below 15
+  return hi >= 16;                              // a variant usable at or above 16
+}
+function _presHasCohort(pres, cohort) {
+  return pres.variants.some(v => _variantPlayable(pres, v, cohort));
+}
+
+function _generateScenarioInner(presId, _seed, _presIndexFromCode, cohort) {
+  cohort = cohort || 'adult';
+  // Presentation selection MUST consume the RNG stream identically whether the
+  // presentation comes from a code, an explicit presId, or a random pick — otherwise
+  // the downstream draws (variant/age/vitals) are offset and a reload diverges.
+  // So: ALWAYS draw one presentation index from the seeded RNG here. When a presId or
+  // a code pins the presentation, we still draw (to keep the stream aligned) but use
+  // the pinned index. The drawn-or-pinned index is what gets encoded.
+  //
+  // The random draw is taken from the cohort-eligible pool (paeds: presentations with a
+  // paed-capable variant; adult: presentations with an adult-capable variant). Reproduction
+  // is unaffected because a code pins the absolute index regardless of pool.
+  let pres, presIndex;
+  const _pool = PRESENTATIONS.filter(p => _presHasCohort(p, cohort));
+  const _poolOrAll = _pool.length ? _pool : PRESENTATIONS;
+  const _drawnPres = _poolOrAll[Math.floor(_rand() * _poolOrAll.length)];   // always consume one draw
+  const _drawnIndex = PRESENTATIONS.indexOf(_drawnPres);
+  if (_presIndexFromCode != null) {
+    presIndex = _presIndexFromCode;
+  } else if (presId) {
+    const idx = PRESENTATIONS.findIndex(p => p.id === presId);
+    presIndex = idx >= 0 ? idx : _drawnIndex;
+  } else {
+    presIndex = _drawnIndex;
+  }
+  pres = PRESENTATIONS[presIndex];
   if (!pres) return null;
+  const seedCode = _encodeSeed(presIndex < 0 ? 0 : presIndex, _seed, cohort);
 
   // 1. Narrative variant (the cause/story). Picked first so it can constrain age.
-  const variant = _pick(pres.variants);
+  //    Constrained to the cohort: in paeds only paed-capable variants are eligible, in
+  //    adult only adult-capable ones. Falls back to all variants if (defensively) none match.
+  const _vpool = pres.variants.filter(v => _variantPlayable(pres, v, cohort));
+  const variant = _pick(_vpool.length ? _vpool : pres.variants);
 
   // 2. Patient within demographic constraints. A variant may raise the minimum age
   //    via `variant.minAge` (e.g. a Type 2 diabetic should not be a toddler); the
-  //    presentation floor still applies as the baseline.
-  const lo = Math.max(pres.demographics.minAge, variant.minAge || 0);
-  const hi = Math.min(pres.demographics.maxAge, variant.maxAge || Infinity);
+  //    presentation floor still applies as the baseline. In the paeds cohort the age
+  //    ceiling is capped at 12; in adult the floor is lifted to at least 16.
+  let lo = Math.max(pres.demographics.minAge, variant.minAge || 0);
+  let hi = Math.min(pres.demographics.maxAge, variant.maxAge || Infinity);
+  if (cohort === 'paeds') hi = Math.min(hi, 15);
+  else lo = Math.max(lo, 16);
+  if (lo > hi) { lo = Math.max(pres.demographics.minAge, variant.minAge || 0); hi = Math.min(pres.demographics.maxAge, variant.maxAge || Infinity); } // defensive
   let age;
-  if (lo < 2 && Math.random() < 0.25) age = _pick([0, 0.5, 1]);     // occasional infant
+  if (lo < 2 && _rand() < 0.25) age = _pick([0, 0.5, 1]);     // occasional infant
   else age = _ri(Math.max(1, Math.ceil(lo)), Math.floor(hi));
   const sex = pres.demographics.sex === 'any' ? _pick(['male', 'female']) : pres.demographics.sex;
 
@@ -122,7 +262,7 @@ function generateScenario(presId) {
     const [lo, hi] = d.spo2Severe;                 // lo = sickest, hi = mildest
     const sev = Math.max(0, Math.min(1, variant.severity));
     const target = hi - sev * (hi - lo);           // sev 1 -> lo, sev 0 -> hi
-    const jittered = target + (Math.random() * 4 - 2); // +/- 2% jitter
+    const jittered = target + (_rand() * 4 - 2); // +/- 2% jitter
     spo2 = Math.max(lo, Math.min(hi, Math.round(jittered)));
   } else {
     spo2 = Array.isArray(d.spo2) ? _ri(d.spo2[0], d.spo2[1]) : _ri(band.spo2[0], band.spo2[1]);
@@ -154,6 +294,16 @@ function generateScenario(presId) {
   let locPool = SCEN_LOCATIONS;
   if (variant.witness === 'unwitnessed')      locPool = SCEN_LOCATIONS.filter(l => l.solo);
   else if (variant.witness === 'witnessed')   locPool = SCEN_LOCATIONS.filter(l => !l.solo || l.found);
+  // PAEDIATRIC HARD FILTER: a child (age <= 12) is never dispatched to an adult-only
+  // place (building site, pub, mart, lone bog/layby, nursing home, etc.). noPaed is a
+  // hard exclude, unlike the soft ageSkew weighting applied later. Applied after the
+  // witness filter so it composes with it; if it empties the pool, fall back to all
+  // non-noPaed locations so we never crash or leak an implausible spot.
+  const isPaed = age <= 12;
+  if (isPaed) {
+    locPool = locPool.filter(l => !l.noPaed);
+    if (!locPool.length) locPool = SCEN_LOCATIONS.filter(l => !l.noPaed);
+  }
   if (!locPool.length) locPool = SCEN_LOCATIONS;
   // Location selection. Two SOFT weightings compose here, both layered on top of the witness
   // filter (which already decided the eligible pool): (a) setting-bias, weighting locations
@@ -202,6 +352,19 @@ function generateScenario(presId) {
   // "collapsed / became unresponsive there", never "found".
   const conscious = variant.conscious !== false;  // default conscious unless flagged false
 
+  // PAEDIATRIC GUARDIAN DEFAULT: a child is almost always with a parent/guardian or
+  // friends, so the "found alone, no history" framing that suits a lone adult collapse
+  // is usually wrong for a child. For paeds (age <= 12) a guardian is present ~88% of
+  // the time; the lone case stays possible (~12%) but rare, and skews to older children.
+  // The flag is drawn from the seeded RNG so it stays reproducible by seed code. A
+  // variant that explicitly sets witness:'unwitnessed' keeps its authored intent
+  // (some scenarios are deliberately found-alone), so we only auto-bend when the variant
+  // hasn't pinned a witness state.
+  const _paedAloneChance = age <= 5 ? 0.05 : 0.15;   // youngest almost never alone
+  const paedGuardian = isPaed && variant.witness == null
+    ? (_rand() >= _paedAloneChance)   // true = guardian present
+    : null;                            // null = not a paed auto-bend (use existing logic)
+
   // Under-3 conscious patients are pre-verbal: if the variant carries an
   // age-appropriate presentationU3 string, use it instead of the verbal-assessment
   // wording (which describes "talking / following commands" — wrong for a toddler).
@@ -219,9 +382,20 @@ function generateScenario(presId) {
   } else {
     events = variant.events;
     if (!conscious) {
-      const frame = location.found
-        ? 'Found unresponsive by a bystander.'
-        : `Collapsed and became unresponsive at ${location.name}.`;
+      // Paed with a guardian present: framed as witnessed by the parent, not "found".
+      // Paed alone (rare) or any adult: original found/collapsed framing.
+      let frame;
+      if (paedGuardian === true) {
+        frame = 'Became unresponsive with a parent present, who is able to give a brief history.';
+      } else if (paedGuardian === false) {
+        frame = location.found
+          ? 'Found unresponsive, with no adult who saw what happened.'
+          : `Became unresponsive at ${location.name}, briefly unattended.`;
+      } else {
+        frame = location.found
+          ? 'Found unresponsive by a bystander.'
+          : `Collapsed and became unresponsive at ${location.name}.`;
+      }
       events = `${frame} ${variant.events}`;
     }
   }
@@ -240,7 +414,9 @@ function generateScenario(presId) {
   // derived from that single source (onsetWhen) so it can't drift from OPQRST Time.
   // Unwitnessed → genuinely unknown (clinically important: often excludes the window).
   let lastIntake;
-  if (!conscious) {
+  if (!conscious && paedGuardian === true) {
+    lastIntake = 'A parent is present and can give a brief account of the lead-up.';
+  } else if (!conscious) {
     lastIntake = 'Unknown, patient unresponsive, no reliable history.';
   } else if (variant.witness === 'unwitnessed') {
     lastIntake = 'Unknown, the patient was found alone and the time of onset is unwitnessed.';
@@ -319,7 +495,7 @@ function generateScenario(presId) {
       });
 
   return { pres, variant, age, sex, band, dispatch, ecg, conscious, location,
-           events, lastIntake, sample, opqrst, presentationText, arrest,
+           events, lastIntake, sample, opqrst, presentationText, arrest, seedCode,
            vitals: { hr, rr, spo2, sys, dia, temp, bgl } };
 }
 
@@ -403,16 +579,58 @@ function renderScenarioCard(sc) {
   // Each drug carries age-specific dosing. Patients >15 get adult doses; <=15 get
   // paediatric doses, matching the split between the Adult and Paediatric CPGs.
   const isAdult = sc.age > 15;
+  // A route value (paramedic / ap) is EITHER a plain string (rendered inline as before)
+  // OR a structured object { lead?, route?, bands:[[range,dose],...], note? } whose age
+  // bands each render in their own bubble for readability. renderDoseValue handles both,
+  // so single-dose drugs (the majority) are completely unaffected.
+  function renderDoseValue(v) {
+    if (v == null) return '';
+    // Dose text legitimately contains '<' and '>' (e.g. "<1 yr", ">5 yrs"). Escape so
+    // they render as text rather than being eaten as stray tags.
+    const escapeHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if (typeof v === 'string') return escapeHtml(v);   // legacy inline string
+    // Structured: optional lead sentence, per-band bubbles, optional trailing note.
+    // Bands may be a single set (with an optional `route` label) or several route groups
+    // via `groups:[{route,bands},...]` (e.g. a drug with both PO and IM age bands).
+    const lead = v.lead ? `<span class="scen-dose-lead">${escapeHtml(v.lead)}</span>` : '';
+    const renderGroup = (route, bands) => {
+      const routeLbl = route ? `<span class="scen-dose-route">${escapeHtml(route)}</span>` : '';
+      const bubbles = (bands || []).map(b =>
+        `<span class="scen-dose-band"><span class="scen-dose-age">${escapeHtml(b[0])}</span><span class="scen-dose-amt">${escapeHtml(b[1])}</span></span>`
+      ).join('');
+      return `${routeLbl}<span class="scen-dose-bands">${bubbles}</span>`;
+    };
+    let body;
+    if (Array.isArray(v.groups)) {
+      body = v.groups.map(g => `<div class="scen-dose-group">${renderGroup(g.route, g.bands)}</div>`).join('');
+    } else {
+      body = renderGroup(v.route, v.bands);
+    }
+    const note = v.note ? `<span class="scen-dose-note">${escapeHtml(v.note)}</span>` : '';
+    return `${lead}${body}${note}`;
+  }
   const drugLines = (p.reveal.drugs || []).map(dr => {
     const d = isAdult ? (dr.adult || dr) : (dr.paed || dr);
     // paramedic route shown as the main line; ap route (if any) as the amber pill.
     // Some drugs are AP-only (no paramedic route) — show just the name + AP pill,
     // never leak "undefined".
-    const main = d.paramedic ? ` &mdash; ${d.paramedic}` : '';
+    const paramVal = d.paramedic != null ? renderDoseValue(d.paramedic) : '';
+    const isStructuredParam = d.paramedic != null && typeof d.paramedic !== 'string';
+    // Structured paramedic dose renders as its own block (so bubbles sit on their own
+    // line); a plain string keeps the inline em-dash form it has always used.
+    const main = d.paramedic == null ? ''
+               : isStructuredParam ? `<div class="scen-dose-wrap">${paramVal}</div>`
+               : ` &mdash; ${paramVal}`;
+    const apVal = d.ap != null ? renderDoseValue(d.ap) : '';
+    const apIsStructured = d.ap != null && typeof d.ap !== 'string';
+    const apPill = d.ap == null ? ''
+                 : apIsStructured
+                   ? `<span class="scen-ap-pill">AP only:</span><div class="scen-dose-wrap scen-dose-ap">${apVal}</div>`
+                   : `<span class="scen-ap-pill">AP only: ${apVal}</span>`;
     return `
     <li>
       <strong>${dr.name}</strong>${main}
-      ${d.ap ? `<span class="scen-ap-pill">AP only: ${d.ap}</span>` : ''}
+      ${apPill}
     </li>`;
   }).join('');
 
@@ -422,6 +640,11 @@ function renderScenarioCard(sc) {
         <div class="scen-badge">OSCE Station</div>
         <div class="scen-title">Emergency Call</div>
       </div>
+      ${sc.seedCode ? `<button class="scen-seed" id="scenSeedBtn" title="Tap to copy this scenario's share code">
+        <span class="scen-seed-lbl">Seed</span>
+        <span class="scen-seed-code">${sc.seedCode}</span>
+        <span class="scen-seed-copy" id="scenSeedCopy">Copy</span>
+      </button>` : ''}
       <div class="scen-sec"><div class="scen-sec-title">Dispatch</div><div class="scen-dispatch">${sc.dispatch}</div></div>
       ${sec('Patient', [['Age', sc.age < 1 ? sc.band.label : `${sc.age} years`], ['Sex', sc.sex === 'male' ? 'Male' : 'Female']])}
       <div class="scen-sec"><div class="scen-sec-title">On Arrival</div><div class="scen-dispatch">${sc.presentationText}</div></div>
@@ -457,6 +680,18 @@ function renderScenarioCard(sc) {
       haptic();
     });
     document.getElementById('scenNewBtn')?.addEventListener('click', () => { startScenario(); haptic(); });
+    const seedBtn = document.getElementById('scenSeedBtn');
+    if (seedBtn) seedBtn.addEventListener('click', () => {
+      const code = sc.seedCode;
+      const done = () => {
+        const tag = document.getElementById('scenSeedCopy');
+        if (tag) { tag.textContent = 'Copied'; setTimeout(() => { if (tag) tag.textContent = 'Copy'; }, 1400); }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done).catch(done);
+      } else { done(); }   // copy may be unavailable in some webviews; still flash feedback
+      haptic();
+    });
   }
 }
 
@@ -475,10 +710,9 @@ function scenarioChoiceHTML() {
         <span class="scen-cohort-ico">🧑</span>
         <span class="scen-cohort-txt"><span class="scen-cohort-name">Adult Scenario</span><span class="scen-cohort-sub">Generate an adult OSCE station</span></span>
       </button>
-      <button class="scen-cohort-btn scen-cohort-paeds scen-cohort-soon" id="scenPaedsBtn" disabled>
+      <button class="scen-cohort-btn scen-cohort-paeds" id="scenPaedsBtn">
         <span class="scen-cohort-ico">🧒</span>
         <span class="scen-cohort-txt"><span class="scen-cohort-name">Paediatric Scenario</span><span class="scen-cohort-sub">Generate a paediatric OSCE station</span></span>
-        <span class="scen-cohort-soon-badge">Coming soon</span>
       </button>
       <button class="scen-cohort-btn scen-cohort-mega scen-cohort-soon" id="scenMegaBtn" disabled>
         <span class="scen-cohort-ico">🏔️</span>
@@ -527,7 +761,7 @@ function wireScenarioTimer() {
 // Wire the two cohort buttons after the HTML is in the DOM.
 function wireScenarioChoice() {
   document.getElementById('scenAdultBtn')?.addEventListener('click', () => { openScenarioRunner('adult'); haptic(); });
-  document.getElementById('scenPaedsBtn')?.addEventListener('click', () => { showToast('Paediatric scenarios, coming soon'); });
+  document.getElementById('scenPaedsBtn')?.addEventListener('click', () => { openScenarioRunner('paeds'); haptic(); });
   document.getElementById('scenMegaBtn')?.addEventListener('click', () => { showToast('Mega OSCE, coming soon'); });
   wireScenarioTimer();
 }
@@ -589,7 +823,7 @@ function goScenario() {
   });
   document.getElementById('scenPaedsBtn')?.addEventListener('click', () => {
     if (document.getElementById('scenSkipChk')?.checked) { G.scenIntroSeen = true; saveG(); }
-    showToast('Paediatric scenarios, coming soon');
+    openScenarioRunner('paeds'); haptic();
   });
   document.getElementById('scenMegaBtn')?.addEventListener('click', () => {
     if (document.getElementById('scenSkipChk')?.checked) { G.scenIntroSeen = true; saveG(); }
@@ -619,10 +853,27 @@ function openScenarioRunner(cohort) {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
     </div>
     ${timerBar}
+    <div class="scen-load-row">
+      <input type="text" id="scenSeedInput" class="scen-seed-input" placeholder="Enter a seed code (e.g. K7F2-9QX)" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <button class="scen-load-btn" id="scenLoadBtn">Load</button>
+    </div>
     <div id="scenarioContent"></div>`;
   // Back returns to the cohort choice screen (goScenario), so the user can switch
   // between Adult and Paeds without leaving the feature. Stop any running timer first.
   document.getElementById('scenRunnerBack')?.addEventListener('click', () => { stopScenTimer(); goScenario(); });
+  // Load-by-seed: validate the code, then generate that exact station. Invalid or
+  // stale codes are flagged via toast and nothing is generated (the current card stays).
+  const loadBtn = document.getElementById('scenLoadBtn');
+  const seedInput = document.getElementById('scenSeedInput');
+  function _tryLoadSeed() {
+    const code = (seedInput?.value || '').trim();
+    if (!code) return;
+    if (!_decodeSeed(code)) { showToast('That seed code isn\u2019t valid'); haptic(); return; }
+    startScenario(undefined, cohort, code);
+    haptic();
+  }
+  if (loadBtn) loadBtn.addEventListener('click', _tryLoadSeed);
+  if (seedInput) seedInput.addEventListener('keydown', e => { if (e.key === 'Enter') _tryLoadSeed(); });
   startScenario(undefined, cohort);
 }
 
@@ -736,7 +987,7 @@ function wireScenTimerControls() {
 // does not change generation (all presentations are adult); it is threaded now so paeds
 // can filter here later (e.g. generateScenario with a cohort/age filter).
 let _scenCohort = 'adult';
-function startScenario(presId, cohort) {
+function startScenario(presId, cohort, seedCode) {
   if (cohort) _scenCohort = cohort;
   const wrap = document.getElementById('scenarioContent');
   // Brief "generating" beat — hints that each station is freshly built, and stops
@@ -753,13 +1004,13 @@ function startScenario(presId, cohort) {
     const cyc = setInterval(() => { mi = (mi + 1) % msgs.length; if (textEl) textEl.textContent = msgs[mi]; }, 280);
     setTimeout(() => {
       clearInterval(cyc);
-      const sc = generateScenario(presId);
+      const sc = generateScenario(presId, seedCode, _scenCohort);
       renderScenarioCard(sc);
       armScenTimer();            // ready/paused at full time, waits for examiner to tap Start
       wireScenTimerControls();
     }, 900);
   } else {
-    const sc = generateScenario(presId);
+    const sc = generateScenario(presId, seedCode, _scenCohort);
     renderScenarioCard(sc);
     armScenTimer();
     wireScenTimerControls();
